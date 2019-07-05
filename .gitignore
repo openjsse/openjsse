@@ -1,0 +1,9 @@
+target
+gh-pages
+.idea
+.DS_Store
+*.iml
+release.properties
+pom.xml.releaseBackup
+src/main/java/org/openjsse/Version.java
+src/main/resources/VERSION
