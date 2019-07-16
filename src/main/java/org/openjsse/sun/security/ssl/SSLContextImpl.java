@@ -1565,8 +1565,9 @@ final class AbstractTrustManagerWrapper extends X509ExtendedTrustManager
         checkAdditionalTrust(chain, authType, engine, false);
     }
 
-    private void checkAdditionalTrust(X509Certificate[] chain, String authType,
-                Socket socket, boolean isClient) throws CertificateException {
+    private void checkAdditionalTrust(X509Certificate[] chain,
+            String authType, Socket socket,
+            boolean checkClientTrusted) throws CertificateException {
         if (socket != null && socket.isConnected() &&
                                     socket instanceof SSLSocket) {
 
@@ -1580,9 +1581,8 @@ final class AbstractTrustManagerWrapper extends X509ExtendedTrustManager
             String identityAlg = sslSocket.getSSLParameters().
                                         getEndpointIdentificationAlgorithm();
             if (identityAlg != null && identityAlg.length() != 0) {
-                String hostname = session.getPeerHost();
-                X509TrustManagerImpl.checkIdentity(
-                                    hostname, chain[0], identityAlg);
+                X509TrustManagerImpl.checkIdentity(session, chain,
+                                    identityAlg, checkClientTrusted);
             }
 
             // try the best to check the algorithm constraints
@@ -1604,12 +1604,13 @@ final class AbstractTrustManagerWrapper extends X509ExtendedTrustManager
                 constraints = new SSLAlgorithmConstraints(sslSocket, true);
             }
 
-            checkAlgorithmConstraints(chain, constraints, isClient);
+            checkAlgorithmConstraints(chain, constraints, checkClientTrusted);
         }
     }
 
-    private void checkAdditionalTrust(X509Certificate[] chain, String authType,
-            javax.net.ssl.SSLEngine engine, boolean isClient) throws CertificateException {
+    private void checkAdditionalTrust(X509Certificate[] chain,
+            String authType, javax.net.ssl.SSLEngine engine,
+            boolean checkClientTrusted) throws CertificateException {
         if (engine != null) {
             SSLSession session = engine.getHandshakeSession();
             if (session == null) {
@@ -1620,9 +1621,8 @@ final class AbstractTrustManagerWrapper extends X509ExtendedTrustManager
             String identityAlg = engine.getSSLParameters().
                                         getEndpointIdentificationAlgorithm();
             if (identityAlg != null && identityAlg.length() != 0) {
-                String hostname = session.getPeerHost();
-                X509TrustManagerImpl.checkIdentity(
-                                    hostname, chain[0], identityAlg);
+                X509TrustManagerImpl.checkIdentity(session, chain,
+                                    identityAlg, checkClientTrusted);
             }
 
             // try the best to check the algorithm constraints
@@ -1644,13 +1644,13 @@ final class AbstractTrustManagerWrapper extends X509ExtendedTrustManager
                 constraints = new SSLAlgorithmConstraints((org.openjsse.javax.net.ssl.SSLEngine)engine, true);
             }
 
-            checkAlgorithmConstraints(chain, constraints, isClient);
+            checkAlgorithmConstraints(chain, constraints, checkClientTrusted);
         }
     }
 
     private void checkAlgorithmConstraints(X509Certificate[] chain,
             AlgorithmConstraints constraints,
-            boolean isClient) throws CertificateException {
+            boolean checkClientTrusted) throws CertificateException {
         try {
             // Does the certificate chain end with a trusted certificate?
             int checkedLength = chain.length - 1;
@@ -1669,7 +1669,7 @@ final class AbstractTrustManagerWrapper extends X509ExtendedTrustManager
             if (checkedLength >= 0) {
                 AlgorithmChecker checker =
                     new AlgorithmChecker(constraints, null,
-                            (isClient ? Validator.VAR_TLS_CLIENT :
+                            (checkClientTrusted ? Validator.VAR_TLS_CLIENT :
                                         Validator.VAR_TLS_SERVER));
                 checker.init(false);
                 for (int i = checkedLength; i >= 0; i--) {
