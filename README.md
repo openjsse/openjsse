@@ -1,5 +1,7 @@
 OpenJSSE
 ----------------------------------------------
+[![Javadocs](http://www.javadoc.io/badge/org.openjsse/openjsse.svg)](http://www.javadoc.io/doc/org.openjsse/openjsse)
+
 
 ----------------------------------------------------------------------------
 OpenJSSE: A JSSE provider that supports TLS 1.3 on Java SE 8.
