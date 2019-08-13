@@ -33,3 +33,5 @@ avoid collisions.
 The code for this project is licensed under the OpenJDK GPLv2 + CPE
 license, as described in the LICENSE file at the base of this repository
 and in notices found in the various source files.
+
+The project is created and actively supported by [Azul Systems](https://azul.com).
