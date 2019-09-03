@@ -171,7 +171,7 @@
                     <target>1.8</target>
                     <encoding>UTF-8</encoding>
                     <compilerArguments>
-                        <bootclasspath>${java.home}/lib/resources.jar:${java.home}/lib/rt.jar:${java.home}/lib/jce.jar</bootclasspath>
+                        <bootclasspath>${java.home}/lib/resources.jar${path.separator}${java.home}/lib/rt.jar${path.separator}${java.home}/lib/jce.jar</bootclasspath>
                     </compilerArguments>
                 </configuration>
             </plugin>
