@@ -73,7 +73,7 @@
         <jdk.api>https://docs.oracle.com/javase/8/docs/api/</jdk.api>
         <jar.finalName>${project.artifactId}-${project.version}</jar.finalName>
         <build.output>${project.basedir}/target</build.output>
-        <build.bootclasspath>${java.home}/lib/resources.jar:${java.home}/lib/rt.jar:${java.home}/lib/jce.jar</build.bootclasspath>
+        <build.bootclasspath>${java.home}/lib/resources.jar${path.separator}${java.home}/lib/rt.jar${path.separator}${java.home}/lib/jce.jar</build.bootclasspath>
     </properties>
     <profiles>
         <profile>
