@@ -230,6 +230,21 @@ public abstract class OpenJSSE extends Provider {
         put("Signature.MD5andSHA1withRSA",
             "org.openjsse.sun.security.ssl.RSASignature");
 
+        put("Cipher.ChaCha20",
+            "org.openjsse.com.sun.crypto.provider.ChaCha20Cipher$ChaCha20Only");
+        put("Cipher.ChaCha20 SupportedKeyFormats", "RAW");
+        put("Cipher.ChaCha20-Poly1305",
+            "org.openjsse.com.sun.crypto.provider.ChaCha20Cipher$ChaCha20Poly1305");
+        put("Cipher.ChaCha20-Poly1305 SupportedKeyFormats", "RAW");
+        put("Alg.Alias.Cipher.1.2.840.113549.1.9.16.3.18", "ChaCha20-Poly1305");
+        put("Alg.Alias.Cipher.OID.1.2.840.113549.1.9.16.3.18", "ChaCha20-Poly1305");
+
+        put("KeyGenerator.ChaCha20",
+            "org.openjsse.com.sun.crypto.provider.KeyGeneratorCore$ChaCha20KeyGenerator");
+
+        put("AlgorithmParameters.ChaCha20-Poly1305",
+            "org.openjsse.com.sun.crypto.provider.ChaCha20Poly1305Parameters");
+
         put("KeyManagerFactory.SunX509",
             "org.openjsse.sun.security.ssl.KeyManagerFactoryImpl$SunX509");
         put("KeyManagerFactory.NewSunX509",

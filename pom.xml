@@ -6,7 +6,7 @@
 
     <groupId>org.openjsse</groupId>
     <artifactId>openjsse</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.1</version>
 
     <name>openjsse</name>
 
@@ -71,8 +71,10 @@
         <version.file>src/main/resources/VERSION</version.file>
         <jdk.version>1.8</jdk.version>
         <jdk.api>https://docs.oracle.com/javase/8/docs/api/</jdk.api>
+        <jar.finalName>${project.artifactId}-${project.version}</jar.finalName>
+        <build.output>${project.basedir}/target</build.output>
+        <build.bootclasspath>${java.home}/lib/resources.jar:${java.home}/lib/rt.jar:${java.home}/lib/jce.jar</build.bootclasspath>
     </properties>
-
     <profiles>
         <profile>
             <id>jdk.version.11</id>
@@ -125,6 +127,13 @@
                                 <arg>java.base/jdk.internal.misc=org.openjsse</arg>
 
                                 <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.util.math=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.util.math.intpoly=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/com.sun.crypto.provider=org.openjsse</arg>
+
+                                <arg>--add-exports</arg>
                                 <arg>jdk.unsupported/sun.misc=org.openjsse</arg>
                             </compilerArgs>
                         </configuration>
@@ -163,6 +172,8 @@
     </distributionManagement>
 
     <build>
+        <finalName>${jar.finalName}</finalName>
+        <directory>${build.output}</directory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -273,7 +284,7 @@
                     <target>${jdk.version}</target>
                     <encoding>UTF-8</encoding>
                     <compilerArguments>
-                        <bootclasspath>${java.home}/lib/resources.jar:${java.home}/lib/rt.jar:${java.home}/lib/jce.jar</bootclasspath>
+                        <bootclasspath>${build.bootclasspath}</bootclasspath>
                     </compilerArguments>
                 </configuration>
             </plugin>
