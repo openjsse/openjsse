@@ -46,6 +46,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
+import java.security.NoSuchAlgorithmException;
 import org.openjsse.sun.security.ssl.Authenticator.MAC;
 import static org.openjsse.sun.security.ssl.CipherType.*;
 import static org.openjsse.sun.security.ssl.JsseJce.*;
@@ -490,14 +491,30 @@ enum SSLCipher {
 
         // availability of this bulk cipher
         //
-        // We assume all supported ciphers are always available since they are
-        // shipped with the SunJCE  provider.  However, AES/256 is unavailable
-        // when the default JCE policy jurisdiction files are installed because
-        // of key length restrictions.
-        this.isAvailable = allowed && isUnlimited(keySize, transformation);
+        // AES/256 is unavailable when the default JCE policy jurisdiction files
+        // are installed because of key length restrictions.
+        this.isAvailable = allowed && isUnlimited(keySize, transformation) &&
+                isTransformationAvailable(transformation);
 
         this.readCipherGenerators = readCipherGenerators;
         this.writeCipherGenerators = writeCipherGenerators;
+    }
+
+    private static boolean isTransformationAvailable(String transformation) {
+        if (transformation.equals("NULL")) {
+            return true;
+        }
+        try {
+            JsseJce.getCipher(transformation);
+            return true;
+        } catch (NoSuchAlgorithmException e) {
+            if (SSLLogger.isOn && SSLLogger.isOn("ssl")) {
+                SSLLogger.fine("Transformation " + transformation + " is" +
+                        " not available.");
+            }
+        }
+        return false;
+
     }
 
     SSLReadCipher createReadCipher(Authenticator authenticator,
