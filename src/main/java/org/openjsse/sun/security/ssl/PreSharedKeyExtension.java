@@ -399,15 +399,22 @@ final class PreSharedKeyExtension {
                 for (PskIdentity requestedId : pskSpec.identities) {
                     SSLSessionImpl s = sessionCache.get(requestedId.identity);
                     if (s != null && canRejoin(clientHello, shc, s)) {
-                        if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
-                            SSLLogger.fine("Resuming session: ", s);
+                        // Can not perform concurrent PSK session resumptions for the same identity
+                        // Remove resuming session from the session cache
+                        synchronized (sessionCache) {
+                            SSLSessionImpl rs = sessionCache.get(requestedId.identity);
+                            if (rs == s) {
+                                if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
+                                    SSLLogger.fine("Resuming session: ", s);
+                                }
+                                sessionCache.remove(s.getSessionId());
+                                // binder will be checked later
+                                shc.resumingSession = s;
+                                shc.handshakeExtensions.put(SH_PRE_SHARED_KEY,
+                                    new SHPreSharedKeySpec(idIndex));   // for the index
+                                break;
+                            }
                         }
-
-                        // binder will be checked later
-                        shc.resumingSession = s;
-                        shc.handshakeExtensions.put(SH_PRE_SHARED_KEY,
-                            new SHPreSharedKeySpec(idIndex));   // for the index
-                        break;
                     }
 
                     ++idIndex;
