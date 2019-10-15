@@ -61,13 +61,11 @@ import java.util.Map;
  *
  */
 public abstract class OpenJSSE extends Provider {
-    public static final double PROVIDER_VER = 1.8d;
+    public static final double PROVIDER_VER;
 
     private static final long serialVersionUID = 3231825739635378733L;
 
-    private static String info = "JDK JSSE provider" +
-        "(PKCS12, SunX509/PKIX key/trust factories, " +
-        "SSLv3/TLSv1/TLSv1.1/TLSv1.2/TLSv1.3)";
+    private static String info;
 
     private static String fipsInfo =
         "JDK JSSE provider (FIPS mode, crypto provider ";
@@ -82,6 +80,18 @@ public abstract class OpenJSSE extends Provider {
     // operations. null in non-FIPS mode
     static java.security.Provider cryptoProvider;
 
+    static {
+        PROVIDER_VER = Double.parseDouble(System.getProperty("java.specification.version"));
+        if (PROVIDER_VER == 1.8d) {
+            info = "JDK JSSE provider" +
+                   "(PKCS12, SunX509/PKIX key/trust factories, " +
+                   "SSLv3/TLSv1/TLSv1.1/TLSv1.2/TLSv1.3)";
+        } else {
+            info = "JDK JSSE provider" +
+                   "(PKCS12, SunX509/PKIX key/trust factories, " +
+                   "SSLv3/TLSv1/TLSv1.1/TLSv1.2/TLSv1.3/DTLSv1.0/DTLSv1.2)";
+        }
+    }
     protected static synchronized boolean isFIPS() {
         if (fips == null) {
             fips = false;
@@ -109,6 +119,7 @@ public abstract class OpenJSSE extends Provider {
     }
 
     // standard constructor
+    @SuppressWarnings( "deprecation" )
     protected OpenJSSE() {
         super("OpenJSSE", PROVIDER_VER, info);
         subclassCheck();
@@ -136,6 +147,7 @@ public abstract class OpenJSSE extends Provider {
         return t;
     }
 
+    @SuppressWarnings( "deprecation" )
     private OpenJSSE(java.security.Provider cryptoProvider,
             String providerName) {
         super("OpenJSSE", PROVIDER_VER, fipsInfo + providerName + ")");
@@ -153,6 +165,7 @@ public abstract class OpenJSSE extends Provider {
         registerAlgorithms(true);
     }
 
+    @SuppressWarnings("unchecked")
     private void registerAlgorithms(final boolean isfips) {
         AccessController.doPrivileged(new PrivilegedAction<Object>() {
             @Override
@@ -246,6 +259,15 @@ public abstract class OpenJSSE extends Provider {
             put("Alg.Alias.SSLContext.SSLv3", "TLSv1");
         }
 
+        if (PROVIDER_VER > 1.8d) {
+            put("SSLContext.DTLSv1.0",
+                "org.openjsse.sun.security.ssl.SSLContextImpl$DTLS10Context");
+            put("SSLContext.DTLSv1.2",
+                "org.openjsse.sun.security.ssl.SSLContextImpl$DTLS12Context");
+            put("SSLContext.DTLS",
+                "org.openjsse.sun.security.ssl.SSLContextImpl$DTLSContext");
+        }
+
         put("SSLContext.Default",
             "org.openjsse.sun.security.ssl.SSLContextImpl$DefaultSSLContext");
 
@@ -307,13 +329,15 @@ public abstract class OpenJSSE extends Provider {
         put("AlgorithmParameters.RSASSA-PSS",
                 "org.openjsse.sun.security.rsa.PSSParameters");
 
-        put("MessageDigest.SHA-512/224", "org.openjsse.sun.security.provider.SHA5$SHA512_224");
-        put("MessageDigest.SHA-512/256", "org.openjsse.sun.security.provider.SHA5$SHA512_256");
+        if (PROVIDER_VER == 1.8d) {
+            put("MessageDigest.SHA-512/224", "org.openjsse.sun.security.provider.SHA5$SHA512_224");
+            put("MessageDigest.SHA-512/256", "org.openjsse.sun.security.provider.SHA5$SHA512_256");
 
-        put("MessageDigest.SHA3-224", "org.openjsse.sun.security.provider.SHA3$SHA224");
-        put("MessageDigest.SHA3-256", "org.openjsse.sun.security.provider.SHA3$SHA256");
-        put("MessageDigest.SHA3-384", "org.openjsse.sun.security.provider.SHA3$SHA384");
-        put("MessageDigest.SHA3-512", "org.openjsse.sun.security.provider.SHA3$SHA512");
+            put("MessageDigest.SHA3-224", "org.openjsse.sun.security.provider.SHA3$SHA224");
+            put("MessageDigest.SHA3-256", "org.openjsse.sun.security.provider.SHA3$SHA256");
+            put("MessageDigest.SHA3-384", "org.openjsse.sun.security.provider.SHA3$SHA384");
+            put("MessageDigest.SHA3-512", "org.openjsse.sun.security.provider.SHA3$SHA512");
+        }
 
         // aliases
         put("Alg.Alias.Signature.1.2.840.113549.1.1.15",     "SHA512/224withRSA");
@@ -368,6 +392,7 @@ public abstract class OpenJSSE extends Provider {
         super.finalize();
     }
 
+    @SuppressWarnings("cast")
     private static ObjectIdentifier oid(int ... values) {
         return (ObjectIdentifier)AccessController.doPrivileged(new PrivilegedAction<ObjectIdentifier>() {
             @Override

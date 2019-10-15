@@ -98,8 +98,8 @@ final class SSLConfiguration implements Cloneable {
     boolean                     enableSessionCreation;
 
     // the application layer protocol negotiation configuration
-    BiFunction<SSLSocket, List<String>, String> socketAPSelector;
-    BiFunction<SSLEngine, List<String>, String> engineAPSelector;
+    BiFunction<javax.net.ssl.SSLSocket, List<String>, String> socketAPSelector;
+    BiFunction<javax.net.ssl.SSLEngine, List<String>, String> engineAPSelector;
 
     HashMap<HandshakeCompletedListener, AccessControlContext>
                                 handshakeListeners;

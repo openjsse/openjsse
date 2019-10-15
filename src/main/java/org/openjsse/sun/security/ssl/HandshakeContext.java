@@ -386,6 +386,7 @@ abstract class HandshakeContext implements ConnectionContext {
         return handshakeType;
     }
 
+    @SuppressWarnings("cast")
     void dispatch(byte handshakeType, Plaintext plaintext) throws IOException {
         if (conContext.transport.useDelegatedTask()) {
             boolean hasDelegated = !delegatedActions.isEmpty();

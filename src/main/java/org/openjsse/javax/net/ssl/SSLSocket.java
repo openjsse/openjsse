@@ -293,7 +293,7 @@ public abstract class SSLSocket extends javax.net.ssl.SSLSocket
      * @since 9
      */
     public void setHandshakeApplicationProtocolSelector(
-            BiFunction<SSLSocket, List<String>, String> selector) {
+            BiFunction<javax.net.ssl.SSLSocket, List<String>, String> selector) {
         throw new UnsupportedOperationException();
     }
 
@@ -313,7 +313,7 @@ public abstract class SSLSocket extends javax.net.ssl.SSLSocket
      *         does not implement the operation.
      * @since 9
      */
-    public BiFunction<SSLSocket, List<String>, String>
+    public BiFunction<javax.net.ssl.SSLSocket, List<String>, String>
             getHandshakeApplicationProtocolSelector() {
         throw new UnsupportedOperationException();
     }

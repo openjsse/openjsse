@@ -24,43 +24,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.openjsse.net.ssl;
+package org.openjsse.sun.security.ssl;
 
-/**
- * Main class for the OpenJSSE provider. The actual code was moved to the
- * class sun.security.ssl.OpenJSSE, but for backward compatibility we
- * continue to use this class as the main Provider class.
- */
-@SuppressWarnings("exports")
-public final class OpenJSSE extends org.openjsse.sun.security.ssl.OpenJSSE {
+import jdk.internal.misc.JavaNetInetAddressAccess;
+import jdk.internal.misc.SharedSecrets;
+import java.net.InetAddress;
 
-    private static final long serialVersionUID = 3231825739635378733L;
-
-    // standard constructor
-    public OpenJSSE() {
-        super();
+public class HostNameAccessor {
+    public static String getOriginalHostName(InetAddress inetAddress) {
+        JavaNetInetAddressAccess jna =
+                SharedSecrets.getJavaNetInetAddressAccess();
+        return jna.getOriginalHostName(inetAddress);
     }
-
-    // preferred constructor to enable FIPS mode at runtime
-    public OpenJSSE(java.security.Provider cryptoProvider) {
-        super(cryptoProvider);
-    }
-
-    // constructor to enable FIPS mode from java.security file
-    public OpenJSSE(String cryptoProvider) {
-        super(cryptoProvider);
-    }
-
-    // public for now, but we may want to change it or not document it.
-    public static synchronized boolean isFIPS() {
-        return org.openjsse.sun.security.ssl.OpenJSSE.isFIPS();
-    }
-
-    /**
-     * Installs the JSSE provider.
-     */
-    public static synchronized void install() {
-        /* nop. Remove this method in the future. */
-    }
-
 }

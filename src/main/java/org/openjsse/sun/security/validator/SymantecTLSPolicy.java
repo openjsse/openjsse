@@ -46,7 +46,7 @@ final class SymantecTLSPolicy {
     private static final LocalDate DECEMBER_31_2019 =
         LocalDate.of(2019, Month.DECEMBER, 31);
     // SHA-256 certificate fingerprints of subCAs with later distrust dates
-    private static final Map<String, LocalDate> EXEMPT_SUBCAS = new HashMap();
+    private static final Map<String, LocalDate> EXEMPT_SUBCAS = new HashMap<>();
     static {
         // Subject DN: C=US, O=Apple Inc., OU=Certification Authority,
         //             CN=Apple IST CA 2 - G1

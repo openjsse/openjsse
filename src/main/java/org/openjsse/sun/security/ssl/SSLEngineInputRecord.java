@@ -197,6 +197,7 @@ final class SSLEngineInputRecord extends InputRecord implements SSLRecord {
         return decodeInputRecord(packet);
     }
 
+    @SuppressWarnings("cast")
     private Plaintext[] decodeInputRecord(ByteBuffer packet)
             throws IOException, BadPaddingException {
         //

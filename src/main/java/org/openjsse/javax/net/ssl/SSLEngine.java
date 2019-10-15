@@ -553,7 +553,7 @@ public abstract class SSLEngine extends javax.net.ssl.SSLEngine {
      * @since 9
      */
     public void setHandshakeApplicationProtocolSelector(
-            BiFunction<SSLEngine, List<String>, String> selector) {
+            BiFunction<javax.net.ssl.SSLEngine, List<String>, String> selector) {
         throw new UnsupportedOperationException();
     }
 
@@ -573,7 +573,7 @@ public abstract class SSLEngine extends javax.net.ssl.SSLEngine {
      *         does not implement the operation.
      * @since 9
      */
-    public BiFunction<SSLEngine, List<String>, String>
+    public BiFunction<javax.net.ssl.SSLEngine, List<String>, String>
             getHandshakeApplicationProtocolSelector() {
         throw new UnsupportedOperationException();
     }

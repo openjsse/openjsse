@@ -54,7 +54,7 @@
         <url>scm:git:git://github.com/openjsse/openjsse.git</url>
         <connection>scm:git:git://github.com/openjsse/openjsse.git</connection>
         <developerConnection>scm:git:git@github.com:openjsse/openjsse.git</developerConnection>
-        <tag>1.1.0</tag>
+        <tag>1.1.1</tag>
     </scm>
 
 
@@ -69,7 +69,91 @@
         <java.version.file>src/main/java/org/openjsse/Version.java</java.version.file>
         <version.template.file>src/main/templates/VERSION.template</version.template.file>
         <version.file>src/main/resources/VERSION</version.file>
+        <jdk.version>1.8</jdk.version>
+        <jdk.api>https://docs.oracle.com/javase/8/docs/api/</jdk.api>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>jdk.version.11</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.8.1</version>
+                        <configuration>
+                            <compilerArgs>
+                                <arg>-Werror</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.action=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.x509=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.jca=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.util=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.provider.certpath=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.internal.spec=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.validator=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.pkcs=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.internal.interfaces=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.rsa=org.openjsse</arg>
+
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.net.www.http=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.net.www.protocol.http=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.net.www.protocol.https=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+
+                                <arg>java.base/sun.net.util=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.util.logging=org.openjsse</arg>
+
+                                <arg>--add-exports</arg>
+                                <arg>java.base/com.sun.net.ssl=org.openjsse</arg>
+
+                                <arg>--add-exports</arg>
+                                <arg>java.base/jdk.internal.misc=org.openjsse</arg>
+
+                                <arg>--add-exports</arg>
+                                <arg>jdk.unsupported/sun.misc=org.openjsse</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <configuration>
+                            <additionalOptions>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.x509=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.util=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.pkcs=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.action=org.openjsse</arg>
+                            </additionalOptions>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+               <jdk.version>11</jdk.version>
+               <jdk.api>https://docs.oracle.com/en/java/javase/11/docs/api/</jdk.api>
+            </properties>
+        </profile>
+    </profiles>
 
     <distributionManagement>
         <snapshotRepository>
@@ -99,13 +183,13 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <excludePackageNames>org.openjsse.sun.*:org.openjsse.com.*:org.openjsse:org.openjsse.net.*</excludePackageNames>
+                    <excludePackageNames>org.openjsse.sun.*:org.openjsse.rsa.*:org.openjsse.com.*:org.openjsse:org.openjsse.net.*</excludePackageNames>
                     <!-- force links to Java 8 documentation (should happen automatically
                         but doesn't) -->
                     <javaApiLinks>
                         <property>
-                            <name>api_1.8</name>
-                            <value>https://docs.oracle.com/javase/8/docs/api/</value>
+                            <name>api_${jdk.version}</name>
+                            <value>${jdk.api}</value>
                         </property>
                     </javaApiLinks>
                     <bottom>
@@ -163,12 +247,30 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/main/java${jdk.version}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
                     <encoding>UTF-8</encoding>
                     <compilerArguments>
                         <bootclasspath>${java.home}/lib/resources.jar:${java.home}/lib/rt.jar:${java.home}/lib/jce.jar</bootclasspath>

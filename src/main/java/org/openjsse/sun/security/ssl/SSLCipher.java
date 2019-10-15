@@ -2289,6 +2289,7 @@ enum SSLCipher {
         return newlen;
     }
 
+    @SuppressWarnings("cast")
     private static int removePadding(ByteBuffer bb,
             int tagLen, int blockSize,
             ProtocolVersion protocolVersion) throws BadPaddingException {

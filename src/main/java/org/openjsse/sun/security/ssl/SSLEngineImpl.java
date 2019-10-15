@@ -911,12 +911,12 @@ final class SSLEngineImpl extends SSLEngine implements SSLTransport {
 
     @Override
     public synchronized void setHandshakeApplicationProtocolSelector(
-            BiFunction<SSLEngine, List<String>, String> selector) {
+            BiFunction<javax.net.ssl.SSLEngine, List<String>, String> selector) {
         conContext.sslConfig.engineAPSelector = selector;
     }
 
     @Override
-    public synchronized BiFunction<SSLEngine, List<String>, String>
+    public synchronized BiFunction<javax.net.ssl.SSLEngine, List<String>, String>
             getHandshakeApplicationProtocolSelector() {
         return conContext.sslConfig.engineAPSelector;
     }

@@ -71,6 +71,8 @@ import java.lang.reflect.Field;
  */
 public class X509CertImpl extends sun.security.x509.X509CertImpl {
 
+    private static final long serialVersionUID = -3457612960190864406L;
+
     /**
      * Default constructor.
      */

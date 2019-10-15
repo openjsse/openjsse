@@ -73,6 +73,7 @@ final class JsseJce {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static final class SunCertificates extends Provider {
         private static final long serialVersionUID = -3284138292032213752L;
 

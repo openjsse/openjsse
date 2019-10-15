@@ -72,9 +72,6 @@ import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLProtocolException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLSession;
-import org.openjsse.javax.net.ssl.SSLSocket;
-import sun.misc.JavaNetAccess;
-import sun.misc.SharedSecrets;
 
 /**
  * Implementation of an SSL socket.
@@ -1070,12 +1067,12 @@ public final class SSLSocketImpl
 
     @Override
     public synchronized void setHandshakeApplicationProtocolSelector(
-            BiFunction<SSLSocket, List<String>, String> selector) {
+            BiFunction<javax.net.ssl.SSLSocket, List<String>, String> selector) {
         conContext.sslConfig.socketAPSelector = selector;
     }
 
     @Override
-    public synchronized BiFunction<SSLSocket, List<String>, String>
+    public synchronized BiFunction<javax.net.ssl.SSLSocket, List<String>, String>
             getHandshakeApplicationProtocolSelector() {
         return conContext.sslConfig.socketAPSelector;
     }
@@ -1263,8 +1260,7 @@ public final class SSLSocketImpl
         }
 
         //JDK8
-        JavaNetAccess jna = SharedSecrets.getJavaNetAccess();
-        String originalHostname = jna.getOriginalHostName(inetAddress);
+        String originalHostname = HostNameAccessor.getOriginalHostName(inetAddress);
         if ((originalHostname != null) &&
                 (originalHostname.length() != 0)) {
 

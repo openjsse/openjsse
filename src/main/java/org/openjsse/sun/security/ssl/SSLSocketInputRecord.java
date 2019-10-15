@@ -201,6 +201,7 @@ final class SSLSocketInputRecord extends InputRecord implements SSLRecord {
     }
 
     // Note that destination may be null
+    @SuppressWarnings("cast")
     private Plaintext[] decodeInputRecord(
             byte[] header) throws IOException, BadPaddingException {
         byte contentType = header[0];                   // pos: 0

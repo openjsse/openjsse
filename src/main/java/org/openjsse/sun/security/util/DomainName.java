@@ -201,9 +201,10 @@ class DomainName {
             }
         }
 
+        @SuppressWarnings("cast")
         private static InputStream getPubSuffixStream() {
             InputStream is = (InputStream)AccessController.doPrivileged(
-                new PrivilegedAction() {
+                new PrivilegedAction<InputStream>() {
                     @Override
                     public InputStream run() {
                         File f = new File(System.getProperty("java.home"),
