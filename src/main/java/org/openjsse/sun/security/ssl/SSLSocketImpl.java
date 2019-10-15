@@ -901,7 +901,7 @@ public final class SSLSocketImpl
             }
 
             try {
-                shutdownInput(false);
+                SSLSocketImpl.this.close();
             } catch (IOException ioe) {
                 // ignore the exception
                 if (SSLLogger.isOn && SSLLogger.isOn("ssl")) {
@@ -1026,7 +1026,7 @@ public final class SSLSocketImpl
             }
 
             try {
-                shutdownOutput();
+                SSLSocketImpl.this.close();
             } catch (IOException ioe) {
                 // ignore the exception
                 if (SSLLogger.isOn && SSLLogger.isOn("ssl")) {
