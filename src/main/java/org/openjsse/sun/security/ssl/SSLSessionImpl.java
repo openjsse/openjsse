@@ -592,9 +592,10 @@ final class SSLSessionImpl extends ExtendedSSLSession {
      *  {@code javax.security.cert.X509Certificate} type.
      *  Use {@code getPeerCertificates()} instead.
      */
-    @Override
-    @Deprecated
-    public javax.security.cert.X509Certificate[] getPeerCertificateChain()
+   @Override
+   @Deprecated
+   @SuppressWarnings({"deprecated","removal"})
+   public javax.security.cert.X509Certificate[] getPeerCertificateChain()
             throws SSLPeerUnverifiedException {
         //
         // clone to preserve integrity of session ... caller can't

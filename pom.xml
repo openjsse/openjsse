@@ -162,6 +162,92 @@
                <jdk.api>https://docs.oracle.com/en/java/javase/11/docs/api/</jdk.api>
             </properties>
         </profile>
+        <profile>
+            <id>jdk.version.13</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.8.1</version>
+                        <configuration>
+                            <compilerArgs>
+                                <arg>-Werror</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.action=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.x509=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.jca=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.util=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.provider.certpath=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.internal.spec=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.validator=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.pkcs=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.internal.interfaces=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.rsa=org.openjsse</arg>
+
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.net.www.http=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.net.www.protocol.http=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.net.www.protocol.https=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+
+                                <arg>java.base/sun.net.util=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.util.logging=org.openjsse</arg>
+
+                                <arg>--add-exports</arg>
+                                <arg>java.base/com.sun.net.ssl=org.openjsse</arg>
+
+                                <arg>--add-exports</arg>
+                                <arg>java.base/jdk.internal.access=org.openjsse</arg>
+
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.util.math=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.util.math.intpoly=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/com.sun.crypto.provider=org.openjsse</arg>
+
+                                <arg>--add-exports</arg>
+                                <arg>jdk.unsupported/sun.misc=org.openjsse</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <configuration>
+                            <additionalOptions>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.x509=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.util=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.pkcs=org.openjsse</arg>
+                                <arg>--add-exports</arg>
+                                <arg>java.base/sun.security.action=org.openjsse</arg>
+                            </additionalOptions>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+               <jdk.version>13</jdk.version>
+               <jdk.api>https://docs.oracle.com/en/java/javase/13/docs/api/</jdk.api>
+            </properties>
+        </profile>
     </profiles>
 
     <distributionManagement>
