@@ -98,7 +98,7 @@ final class Finished {
             }
 
             if (m.remaining() != verifyDataLen) {
-                throw context.conContext.fatal(Alert.ILLEGAL_PARAMETER,
+                throw context.conContext.fatal(Alert.DECODE_ERROR,
                     "Inappropriate finished message: need " + verifyDataLen +
                     " but remaining " + m.remaining() + " bytes verify_data");
             }
@@ -116,7 +116,7 @@ final class Finished {
                         "Failed to generate verify_data", ioe);
             }
             if (!MessageDigest.isEqual(myVerifyData, verifyData)) {
-                throw context.conContext.fatal(Alert.ILLEGAL_PARAMETER,
+                throw context.conContext.fatal(Alert.DECRYPT_ERROR,
                         "The Finished message cannot be verified.");
             }
         }
