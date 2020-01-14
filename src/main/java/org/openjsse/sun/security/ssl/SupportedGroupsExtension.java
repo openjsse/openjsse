@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.KeyAgreement;
 import javax.net.ssl.SSLProtocolException;
 import sun.security.action.GetPropertyAction;
 import static org.openjsse.sun.security.ssl.SSLExtension.CH_SUPPORTED_GROUPS;
@@ -53,6 +54,8 @@ import static org.openjsse.sun.security.ssl.SSLExtension.EE_SUPPORTED_GROUPS;
 import org.openjsse.sun.security.ssl.SSLExtension.ExtensionConsumer;
 import org.openjsse.sun.security.ssl.SSLExtension.SSLExtensionSpec;
 import org.openjsse.sun.security.ssl.SSLHandshake.HandshakeMessage;
+import org.openjsse.sun.security.util.CurveDB;
+
 
 /**
  * Pack of the "supported_groups" extensions [RFC 4492/7919].
@@ -159,11 +162,17 @@ final class SupportedGroupsExtension {
     }
 
     static enum NamedGroupType {
-        NAMED_GROUP_ECDHE,          // Elliptic Curve Groups (ECDHE)
-        NAMED_GROUP_FFDHE,          // Finite Field Groups (DHE)
-        NAMED_GROUP_XDH,            // Finite Field Groups (XDH)
-        NAMED_GROUP_ARBITRARY,      // arbitrary prime and curves (ECDHE)
-        NAMED_GROUP_NONE;           // Not predefined named group
+        NAMED_GROUP_ECDHE("EC"),            // Elliptic Curve Groups (ECDHE)
+        NAMED_GROUP_FFDHE("DiffieHellman"), // Finite Field Groups (DHE)
+        NAMED_GROUP_XDH("XDH"),             // Finite Field Groups (XDH)
+        NAMED_GROUP_ARBITRARY("EC"),        // arbitrary prime and curves (ECDHE)
+        NAMED_GROUP_NONE("");               // Not predefined named group
+
+        private final String algorithm;     // key exchange name
+
+        private NamedGroupType(String algorithm) {
+            this.algorithm = algorithm;
+        }
 
         boolean isSupported(List<CipherSuite> cipherSuites) {
             for (CipherSuite cs : cipherSuites) {
@@ -261,21 +270,28 @@ final class SupportedGroupsExtension {
 
         // x25519 and x448
         X25519      (0x001D, "x25519", true, "x25519",
-                            ProtocolVersion.PROTOCOLS_TO_13),
+                            ProtocolVersion.PROTOCOLS_TO_13,
+                            NamedParameterSpec.X25519),
         X448        (0x001E, "x448", true, "x448",
-                            ProtocolVersion.PROTOCOLS_TO_13),
+                            ProtocolVersion.PROTOCOLS_TO_13,
+                            NamedParameterSpec.X448),
 
         // Finite Field Diffie-Hellman Ephemeral Parameters (RFC 7919)
         FFDHE_2048  (0x0100, "ffdhe2048",  true,
-                            ProtocolVersion.PROTOCOLS_TO_13),
+                            ProtocolVersion.PROTOCOLS_TO_13,
+                            PredefinedDHParameterSpecs.ffdheParams.get(2048)),
         FFDHE_3072  (0x0101, "ffdhe3072",  true,
-                            ProtocolVersion.PROTOCOLS_TO_13),
+                            ProtocolVersion.PROTOCOLS_TO_13,
+                            PredefinedDHParameterSpecs.ffdheParams.get(3072)),
         FFDHE_4096  (0x0102, "ffdhe4096",  true,
-                            ProtocolVersion.PROTOCOLS_TO_13),
+                            ProtocolVersion.PROTOCOLS_TO_13,
+                            PredefinedDHParameterSpecs.ffdheParams.get(4096)),
         FFDHE_6144  (0x0103, "ffdhe6144",  true,
-                            ProtocolVersion.PROTOCOLS_TO_13),
+                            ProtocolVersion.PROTOCOLS_TO_13,
+                            PredefinedDHParameterSpecs.ffdheParams.get(6144)),
         FFDHE_8192  (0x0104, "ffdhe8192",  true,
-                            ProtocolVersion.PROTOCOLS_TO_13),
+                            ProtocolVersion.PROTOCOLS_TO_13,
+                            PredefinedDHParameterSpecs.ffdheParams.get(8192)),
 
         // Elliptic Curves (RFC 4492)
         //
@@ -292,54 +308,99 @@ final class SupportedGroupsExtension {
         final String algorithm;     // signature algorithm
         final boolean isFips;       // can be used in FIPS mode?
         final ProtocolVersion[] supportedProtocols;
+        final AlgorithmParameterSpec keAlgParamSpec;
+        AlgorithmParameters keAlgParams;
+        boolean isAvailable;
+
+        // Basic Constructor
+        private NamedGroup(int id, NamedGroupType type, String name,
+                String oid, String algorithm, boolean isFips,
+                ProtocolVersion[] supportedProtocols,
+                AlgorithmParameterSpec keAlgParamSpec) {
+            this.id = id;
+            this.type = type;
+            this.name = name;
+            this.oid = oid;
+            this.algorithm = algorithm;
+            this.isFips = isFips;
+            this.supportedProtocols = supportedProtocols;
+            this.keAlgParamSpec = keAlgParamSpec;
+
+            boolean mediator = (keAlgParamSpec != null);
+
+            // An EC provider, for example the SunEC provider, may support
+            // AlgorithmParameters but not KeyPairGenerator or KeyAgreement.
+            if (mediator && (type == NamedGroupType.NAMED_GROUP_ECDHE)) {
+                mediator = JsseJce.isEcAvailable();
+            }
+            // Check the specific algorithm parameters.
+            if (mediator) {
+                try {
+                    AlgorithmParameters algParams =
+                        AlgorithmParameters.getInstance(type.algorithm);
+                    algParams.init(keAlgParamSpec);
+                } catch (InvalidParameterSpecException
+                        | NoSuchAlgorithmException exp) {
+                    if (type != NamedGroupType.NAMED_GROUP_XDH) {
+                        mediator = false;
+                        if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
+                            SSLLogger.warning(
+                                "No AlgorithmParameters for " + name, exp);
+                        }
+                    } else {
+                        // Please remove the following code if the XDH/X25519/X448
+                        // AlgorithmParameters algorithms are supported in JDK.
+                        try {
+                            KeyAgreement.getInstance(name);
+
+                            // The following service is also needed.  But for
+                            // performance, check the KeyAgreement impl only.
+                            //
+                            // KeyFactory.getInstance(name);
+                            // KeyPairGenerator.getInstance(name);
+                            // AlgorithmParameters.getInstance(name);
+                        } catch (NoSuchAlgorithmException nsae) {
+                            mediator = false;
+                            if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
+                                SSLLogger.warning(
+                                    "No AlgorithmParameters for " + name, nsae);
+                            }
+                        }
+                    }
+                }
+            }
+            this.isAvailable = mediator;
+        }
 
         // Constructor used for Elliptic Curve Groups (ECDHE)
         private NamedGroup(int id, String name, String oid, boolean isFips,
                 ProtocolVersion[] supportedProtocols) {
-            this.id = id;
-            this.type = NamedGroupType.NAMED_GROUP_ECDHE;
-            this.name = name;
-            this.oid = oid;
-            this.algorithm = "EC";
-            this.isFips = isFips;
-            this.supportedProtocols = supportedProtocols;
+            this(id, NamedGroupType.NAMED_GROUP_ECDHE, name, oid, "EC",
+                 isFips, supportedProtocols, CurveDB.lookup(name));
         }
 
         // Constructor used for Elliptic Curve Groups (XDH)
         private NamedGroup(int id, String name,
                 boolean isFips, String algorithm,
-                ProtocolVersion[] supportedProtocols) {
-            this.id = id;
-            this.type = NamedGroupType.NAMED_GROUP_XDH;
-            this.name = name;
-            this.oid = null;
-            this.algorithm = algorithm;
-            this.isFips = isFips;
-            this.supportedProtocols = supportedProtocols;
+                ProtocolVersion[] supportedProtocols,
+                AlgorithmParameterSpec keAlgParamSpec) {
+            this(id, NamedGroupType.NAMED_GROUP_XDH, name, null, algorithm,
+                 isFips, supportedProtocols, keAlgParamSpec);
         }
 
         // Constructor used for Finite Field Diffie-Hellman Groups (FFDHE)
         private NamedGroup(int id, String name, boolean isFips,
-                ProtocolVersion[] supportedProtocols) {
-            this.id = id;
-            this.type = NamedGroupType.NAMED_GROUP_FFDHE;
-            this.name = name;
-            this.oid = null;
-            this.algorithm = "DiffieHellman";
-            this.isFips = isFips;
-            this.supportedProtocols = supportedProtocols;
+                ProtocolVersion[] supportedProtocols,
+                AlgorithmParameterSpec keAlgParamSpec) {
+            this(id, NamedGroupType.NAMED_GROUP_FFDHE, name, null, "DiffieHellman",
+                 isFips, supportedProtocols, keAlgParamSpec);
         }
 
         // Constructor used for arbitrary prime and curves (ECDHE)
         private NamedGroup(int id, String name,
                 ProtocolVersion[] supportedProtocols) {
-            this.id = id;
-            this.type = NamedGroupType.NAMED_GROUP_ARBITRARY;
-            this.name = name;
-            this.oid = null;
-            this.algorithm = "EC";
-            this.isFips = false;
-            this.supportedProtocols = supportedProtocols;
+            this(id, NamedGroupType.NAMED_GROUP_ARBITRARY, name, null, "EC",
+                 false, supportedProtocols, null);
         }
 
         static NamedGroup valueOf(int id) {
@@ -353,12 +414,11 @@ final class SupportedGroupsExtension {
         }
 
         static NamedGroup valueOf(ECParameterSpec params) {
-            String oid = JsseJce.getNamedCurveOid(params);
-            if ((oid != null) && (!oid.isEmpty())) {
-                for (NamedGroup group : NamedGroup.values()) {
-                    if ((group.type == NamedGroupType.NAMED_GROUP_ECDHE) &&
-                            oid.equals(group.oid)) {
-                        return group;
+            for (NamedGroup ng : NamedGroup.values()) {
+                if (ng.type == NamedGroupType.NAMED_GROUP_ECDHE) {
+                    if ((params == ng.keAlgParamSpec) ||
+                            (ng.keAlgParamSpec == CurveDB.lookup(params))) {
+                        return ng;
                     }
                 }
             }
@@ -367,27 +427,14 @@ final class SupportedGroupsExtension {
         }
 
         static NamedGroup valueOf(DHParameterSpec params) {
-            for (Map.Entry<NamedGroup, AlgorithmParameters> me :
-                    SupportedGroups.namedGroupParams.entrySet()) {
-                NamedGroup ng = me.getKey();
+            for (NamedGroup ng : NamedGroup.values()) {
                 if (ng.type != NamedGroupType.NAMED_GROUP_FFDHE) {
                     continue;
                 }
 
-                DHParameterSpec ngParams = null;
-                AlgorithmParameters aps = me.getValue();
-                try {
-                    ngParams = aps.getParameterSpec(DHParameterSpec.class);
-                } catch (InvalidParameterSpecException ipse) {
-                    // should be unlikely
-                }
-
-                if (ngParams == null) {
-                    continue;
-                }
-
-                if (ngParams.getP().equals(params.getP()) &&
-                        ngParams.getG().equals(params.getG())) {
+                DHParameterSpec ngParams = (DHParameterSpec)ng.keAlgParamSpec;
+                if (ngParams.getP().equals(params.getP())
+                        && ngParams.getG().equals(params.getG())) {
                     return ng;
                 }
             }
@@ -416,18 +463,22 @@ final class SupportedGroupsExtension {
         }
 
         boolean isAvailable(List<ProtocolVersion> protocolVersions) {
-            for (ProtocolVersion pv : supportedProtocols) {
-                if (protocolVersions.contains(pv)) {
-                    return true;
+            if (this.isAvailable) {
+                for (ProtocolVersion pv : supportedProtocols) {
+                    if (protocolVersions.contains(pv)) {
+                        return true;
+                    }
                 }
             }
             return false;
         }
 
         boolean isAvailable(ProtocolVersion protocolVersion) {
-            for (ProtocolVersion pv : supportedProtocols) {
-                if (protocolVersion == pv) {
-                    return true;
+            if (this.isAvailable) {
+                for (ProtocolVersion pv : supportedProtocols) {
+                    if (protocolVersion == pv) {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -1028,4 +1079,44 @@ final class SupportedGroupsExtension {
             // No impact on session resumption.
         }
     }
+
+    static class NamedParameterSpec implements AlgorithmParameterSpec {
+
+       /**
+        * The X25519 parameters
+        */
+        public static final NamedParameterSpec X25519
+            = new NamedParameterSpec("X25519");
+       /**
+        * The X448 parameters
+        */
+        public static final NamedParameterSpec X448
+            = new NamedParameterSpec("X448");
+
+        private String name;
+
+        /**
+         * Creates a parameter specification using a standard (or predefined)
+         * name {@code stdName}. For the
+         * list of supported names, please consult the documentation
+         * of the provider whose implementation will be used.
+         *
+         * @param stdName the standard name of the algorithm parameters
+         *
+         * @throws NullPointerException if {@code stdName}
+         * is null.
+         */
+        public NamedParameterSpec(String stdName) {
+            this.name = stdName;
+        }
+
+        /**
+         * Returns the standard name that determines the algorithm parameters.
+         * @return the standard name.
+         */
+        public String getName() {
+            return name;
+        }
+    }
+
 }
