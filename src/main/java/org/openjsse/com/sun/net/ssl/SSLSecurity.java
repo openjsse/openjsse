@@ -415,7 +415,7 @@ final class TrustManagerFactorySpiWrapper extends TrustManagerFactorySpi {
         TrustManager[] tmaw = new TrustManager[tma.length];
 
         for (src = 0, dst = 0; src < tma.length; ) {
-            if (!(tma[src] instanceof com.sun.net.ssl.TrustManager)) {
+            if (!(tma[src] instanceof org.openjsse.com.sun.net.ssl.TrustManager)) {
                 // We only know how to wrap X509TrustManagers, as
                 // TrustManagers don't have any methods to wrap.
                 if (tma[src] instanceof javax.net.ssl.X509TrustManager) {
@@ -469,7 +469,7 @@ final class KeyManagerFactorySpiWrapper extends KeyManagerFactorySpi {
         KeyManager[] kmaw = new KeyManager[kma.length];
 
         for (src = 0, dst = 0; src < kma.length; ) {
-            if (!(kma[src] instanceof com.sun.net.ssl.KeyManager)) {
+            if (!(kma[src] instanceof org.openjsse.com.sun.net.ssl.KeyManager)) {
                 // We only know how to wrap X509KeyManagers, as
                 // KeyManagers don't have any methods to wrap.
                 if (kma[src] instanceof javax.net.ssl.X509KeyManager) {
