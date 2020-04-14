@@ -47,6 +47,7 @@ import javax.net.ssl.SSLPermission;
 import javax.net.ssl.SSLSessionBindingEvent;
 import javax.net.ssl.SSLSessionBindingListener;
 import javax.net.ssl.SSLSessionContext;
+import javax.security.auth.x500.X500Principal;
 
 /**
  * Implements the SSL session interface, and exposes the session context
@@ -136,6 +137,8 @@ final class SSLSessionImpl extends ExtendedSSLSession {
     // in this session.
     private final String              identificationProtocol;
 
+    // Certificate Authorities
+    private X500Principal[] certificateAuthorities;
     /*
      * Create a new non-rejoinable session, using the default (null)
      * cipher spec.  This constructor returns a session which could
@@ -531,6 +534,28 @@ final class SSLSessionImpl extends ExtendedSSLSession {
         return false;
     }
 
+    /**
+     * Sets the certificate authority indications for a TLS session (sent
+     * by either a Client or a Server). This information will be used for
+     * certificate selection during the TLS handshake.
+     *
+     * @param certificateAuthorities certificate authority indications.
+     */
+    void setCertificateAuthorities(X500Principal[] certificateAuthorities) {
+        this.certificateAuthorities = certificateAuthorities;
+    }
+
+    /**
+     * Gets the certificate authority indications for a TLS session (sent
+     * by either a Client or a Server). This information will be used for
+     * certificate selection during the TLS handshake. May be {@code null}
+     * certificate authority indications were not set.
+     *
+     * @return certificate authority indications for a TLS session.
+     */
+    X500Principal[] getCertificateAuthorities() {
+        return this.certificateAuthorities;
+    }
 
     /**
      * Return the cert chain presented by the peer in the

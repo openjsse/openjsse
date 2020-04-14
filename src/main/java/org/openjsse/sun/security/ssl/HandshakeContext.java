@@ -141,6 +141,7 @@ abstract class HandshakeContext implements ConnectionContext {
 
     // Known authorities
     X500Principal[]                         peerSupportedAuthorities = null;
+    List<X500Principal>                     localSupportedAuthorities = null;
 
     // SupportedGroups
     List<NamedGroup>                        clientRequestedNamedGroups;

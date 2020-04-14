@@ -47,6 +47,7 @@ import javax.net.ssl.SNIServerName;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.StandardConstants;
 import javax.net.ssl.SNIHostName;
+import javax.security.auth.x500.X500Principal;
 
 import sun.security.provider.certpath.AlgorithmChecker;
 import org.openjsse.sun.security.validator.Validator;
@@ -140,6 +141,7 @@ final class X509KeyManagerImpl extends X509ExtendedKeyManager
             Principal[] issuers, Socket socket) {
         return chooseAlias(getKeyTypes(keyType), issuers, CheckType.SERVER,
             getAlgorithmConstraints(socket),
+            getCertificateAuthorities(socket),
             X509TrustManagerImpl.getRequestedServerNames(socket),
             "HTTPS");    // The SNI HostName is a fully qualified domain name.
                          // The certificate selection scheme for SNI HostName
@@ -158,6 +160,7 @@ final class X509KeyManagerImpl extends X509ExtendedKeyManager
             Principal[] issuers, javax.net.ssl.SSLEngine engine) {
         return chooseAlias(getKeyTypes(keyType), issuers, CheckType.SERVER,
             getAlgorithmConstraints(engine),
+            getCertificateAuthorities(engine),
             X509TrustManagerImpl.getRequestedServerNames(engine),
             "HTTPS");    // The SNI HostName is a fully qualified domain name.
                          // The certificate selection scheme for SNI HostName
@@ -237,6 +240,32 @@ final class X509KeyManagerImpl extends X509ExtendedKeyManager
         }
 
         return new SSLAlgorithmConstraints((org.openjsse.javax.net.ssl.SSLEngine)engine, true);
+    }
+
+    private X500Principal[] getCertificateAuthorities(Socket socket) {
+        if(socket != null && socket.isConnected() && socket instanceof SSLSocket){
+            final SSLSocket sslSocket = (SSLSocket)socket;
+            return getCertificateAuthorities(sslSocket.getHandshakeSession());
+        }
+        return null;
+    }
+
+    private X500Principal[] getCertificateAuthorities(javax.net.ssl.SSLEngine engine) {
+        if (engine != null) {
+                return getCertificateAuthorities(engine.getHandshakeSession());
+        }
+        return null;
+    }
+
+    private X500Principal[] getCertificateAuthorities(SSLSession session) {
+        if (session != null) {
+            if (ProtocolVersion.useTLS12PlusSpec(session.getProtocol())) {
+                if (session instanceof SSLSessionImpl) {
+                    return ((SSLSessionImpl)session).getCertificateAuthorities();
+                }
+            }
+        }
+        return null;
     }
 
     // we construct the alias we return to JSSE as seen in the code below
@@ -368,11 +397,12 @@ final class X509KeyManagerImpl extends X509ExtendedKeyManager
             CheckType checkType, AlgorithmConstraints constraints) {
 
         return chooseAlias(keyTypeList, issuers,
-                                    checkType, constraints, null, null);
+                                    checkType, constraints, null, null, null);
     }
 
     private String chooseAlias(List<KeyType> keyTypeList, Principal[] issuers,
             CheckType checkType, AlgorithmConstraints constraints,
+            X500Principal[] certificateAuthorities,
             List<SNIServerName> requestedServerNames, String idAlgorithm) {
 
         if (keyTypeList == null || keyTypeList.isEmpty()) {
@@ -385,7 +415,7 @@ final class X509KeyManagerImpl extends X509ExtendedKeyManager
             try {
                 List<EntryStatus> results = getAliases(i, keyTypeList,
                             issuerSet, false, checkType, constraints,
-                            requestedServerNames, idAlgorithm);
+                            certificateAuthorities, requestedServerNames, idAlgorithm);
                 if (results != null) {
                     // the results will either be a single perfect match
                     // or 1 or more imperfect matches
@@ -440,7 +470,7 @@ final class X509KeyManagerImpl extends X509ExtendedKeyManager
             try {
                 List<EntryStatus> results = getAliases(i, keyTypeList,
                                     issuerSet, true, checkType, constraints,
-                                    null, null);
+                                    null, null, null);
                 if (results != null) {
                     if (allResults == null) {
                         allResults = new ArrayList<>();
@@ -725,6 +755,7 @@ final class X509KeyManagerImpl extends X509ExtendedKeyManager
             List<KeyType> keyTypes, Set<Principal> issuerSet,
             boolean findAll, CheckType checkType,
             AlgorithmConstraints constraints,
+            X500Principal[] certificateAuthorities,
             List<SNIServerName> requestedServerNames,
             String idAlgorithm) throws Exception {
 
@@ -791,6 +822,30 @@ final class X509KeyManagerImpl extends X509ExtendedKeyManager
                                 "Ignore alias " + alias
                                 + ": issuers do not match");
                     }
+                    continue;
+                }
+            }
+
+            // check that certificate chain has an indicated certificate authority
+            // (if indications are available)
+            if (certificateAuthorities != null) {
+                boolean foundCertificateAuthority = false;
+                // Iterate the certificate chain starting from root certificate
+                for (int i = chain.length-1; i >=0 && !foundCertificateAuthority; i--) {
+                    final X509Certificate cert = (X509Certificate) chain[i];
+                    // Can safely cast because of
+                    // previous check for X509Certificate
+                    for (X500Principal ca : certificateAuthorities) {
+                        try {
+                            if (ca.equals(cert.getSubjectX500Principal())) {
+                                foundCertificateAuthority = true;
+                            }
+                        } catch (Exception e1) {
+                        // Certificate matching is a best-effort. Continue looking for matches.
+                        }
+                    }
+                }
+                if (!foundCertificateAuthority) {
                     continue;
                 }
             }
