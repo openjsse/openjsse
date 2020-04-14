@@ -69,11 +69,6 @@ import javax.security.auth.x500.X500Principal;
 final class SSLSessionImpl extends ExtendedSSLSession {
 
     /*
-     * we only really need a single null session
-     */
-    static final SSLSessionImpl         nullSession = new SSLSessionImpl();
-
-    /*
      * The state of a single session, as described in section 7.1
      * of the SSLv3 spec.
      */
@@ -144,7 +139,7 @@ final class SSLSessionImpl extends ExtendedSSLSession {
      * be used either by a client or by a server, as a connection is
      * first opened and before handshaking begins.
      */
-    private SSLSessionImpl() {
+    SSLSessionImpl() {
         this.protocolVersion = ProtocolVersion.NONE;
         this.cipherSuite = CipherSuite.C_NULL;
         this.sessionId = new SessionId(false, null);
@@ -799,15 +794,6 @@ final class SSLSessionImpl extends ExtendedSSLSession {
      */
     @Override
     public synchronized void invalidate() {
-        //
-        // Can't invalidate the NULL session -- this would be
-        // attempted when we get a handshaking error on a brand
-        // new connection, with no "real" session yet.
-        //
-        if (this == nullSession) {
-            return;
-        }
-
         if (context != null) {
             context.remove(sessionId);
             context = null;
