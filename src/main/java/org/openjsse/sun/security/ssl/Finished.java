@@ -877,6 +877,8 @@ final class Finished {
             // has been received and processed.
             if (!chc.isResumption) {
                 if (chc.handshakeConsumers.containsKey(
+                        SSLHandshake.CERTIFICATE.id) ||
+                    chc.handshakeConsumers.containsKey(
                         SSLHandshake.CERTIFICATE_VERIFY.id)) {
                     throw chc.conContext.fatal(Alert.UNEXPECTED_MESSAGE,
                             "Unexpected Finished handshake message");
@@ -1009,6 +1011,8 @@ final class Finished {
             // has been received and processed.
             if (!shc.isResumption) {
                 if (shc.handshakeConsumers.containsKey(
+                        SSLHandshake.CERTIFICATE.id) ||
+                    shc.handshakeConsumers.containsKey(
                         SSLHandshake.CERTIFICATE_VERIFY.id)) {
                     throw shc.conContext.fatal(Alert.UNEXPECTED_MESSAGE,
                             "Unexpected Finished handshake message");
