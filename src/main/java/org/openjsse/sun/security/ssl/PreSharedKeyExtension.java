@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.Objects;
 import java.util.Collection;
 import javax.crypto.Mac;
@@ -436,7 +435,7 @@ final class PreSharedKeyExtension {
     private static boolean canRejoin(ClientHelloMessage clientHello,
         ServerHandshakeContext shc, SSLSessionImpl s) {
 
-        boolean result = s.isRejoinable() && s.getPreSharedKey().isPresent();
+        boolean result = s.isRejoinable() && (s.getPreSharedKey() != null);
 
         // Check protocol version
         if (result && s.getProtocolVersion() != shc.negotiatedProtocol) {
@@ -564,12 +563,11 @@ final class PreSharedKeyExtension {
     private static void checkBinder(ServerHandshakeContext shc,
             SSLSessionImpl session,
             HandshakeHash pskBinderHash, byte[] binder) throws IOException {
-        Optional<SecretKey> pskOpt = session.getPreSharedKey();
-        if (!pskOpt.isPresent()) {
+         SecretKey psk = session.getPreSharedKey();
+         if (psk == null) {
             throw shc.conContext.fatal(Alert.INTERNAL_ERROR,
                     "Session has no PSK");
         }
-        SecretKey psk = pskOpt.get();
 
         SecretKey binderKey = deriveBinderKey(shc, psk, session);
         byte[] computedBinder =
@@ -681,29 +679,28 @@ final class PreSharedKeyExtension {
             }
 
             // The session must have a pre-shared key
-            Optional<SecretKey> pskOpt = chc.resumingSession.getPreSharedKey();
-            if (!pskOpt.isPresent()) {
+            SecretKey psk = chc.resumingSession.getPreSharedKey();
+            if (psk == null) {
                 if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
                     SSLLogger.fine("Existing session has no PSK.");
                 }
                 return null;
             }
-            SecretKey psk = pskOpt.get();
+
             // The PSK ID can only be used in one connections, but this method
             // may be called twice in a connection if the server sends HRR.
             // ID is saved in the context so it can be used in the second call.
-            Optional<byte[]> pskIdOpt = Optional.ofNullable(chc.pskIdentity);
-            if (!pskIdOpt.isPresent()) {
-                 pskIdOpt = Objects.requireNonNull(chc.resumingSession.consumePskIdentity());
+            if (chc.pskIdentity == null) {
+                chc.pskIdentity = chc.resumingSession.consumePskIdentity();
             }
-            if (!pskIdOpt.isPresent()) {
+
+            if (chc.pskIdentity == null) {
                 if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
                     SSLLogger.fine(
                         "PSK has no identity, or identity was already used");
                 }
                 return null;
             }
-            chc.pskIdentity = pskIdOpt.get();
 
             //The session cannot be used again. Remove it from the cache.
             SSLSessionContextImpl sessionCache = (SSLSessionContextImpl)
