@@ -31,7 +31,6 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * A compact implementation of HandshakeContext for post-handshake messages
@@ -51,8 +50,20 @@ final class PostHandshakeContext extends HandshakeContext {
 
         //JDK8
         handshakeConsumers = new LinkedHashMap<>();
-        handshakeConsumers.put(SSLHandshake.KEY_UPDATE.id, SSLHandshake.KEY_UPDATE);
-        handshakeConsumers.put(SSLHandshake.NEW_SESSION_TICKET.id, SSLHandshake.NEW_SESSION_TICKET);
+        // Add the potential post-handshake consumers.
+        if (context.sslConfig.isClientMode) {
+            handshakeConsumers.putIfAbsent(
+                    SSLHandshake.KEY_UPDATE.id,
+                    SSLHandshake.KEY_UPDATE);
+            handshakeConsumers.putIfAbsent(
+                    SSLHandshake.NEW_SESSION_TICKET.id,
+                    SSLHandshake.NEW_SESSION_TICKET);
+        } else {
+            handshakeConsumers.putIfAbsent(
+                    SSLHandshake.KEY_UPDATE.id,
+                    SSLHandshake.KEY_UPDATE);
+        }
+
         handshakeFinished = true;
     }
 
@@ -81,5 +92,22 @@ final class PostHandshakeContext extends HandshakeContext {
                     "Illegal handshake message: " +
                     SSLHandshake.nameOf(handshakeType), be);
         }
+    }
+
+    static boolean isConsumable(TransportContext context, byte handshakeType) {
+        if (handshakeType == SSLHandshake.KEY_UPDATE.id) {
+            // The KeyUpdate handshake message does not apply to TLS 1.2 and
+            // previous protocols.
+            return context.protocolVersion.useTLS13PlusSpec();
+        }
+
+        if (handshakeType == SSLHandshake.NEW_SESSION_TICKET.id) {
+            // The new session ticket handshake message could be consumer in
+            // client side only.
+            return context.sslConfig.isClientMode;
+        }
+
+        // No more post-handshake message supported currently.
+        return false;
     }
 }
