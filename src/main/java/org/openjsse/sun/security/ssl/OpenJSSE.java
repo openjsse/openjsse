@@ -171,24 +171,6 @@ public abstract class OpenJSSE extends Provider {
             @Override
             public Object run() {
                 doRegister(isfips);
-                // Add new algorithms into AlgorithmsId
-                try {
-                    Object algIdNameTable = null;
-                    Field f =AlgorithmId.class.getDeclaredField("nameTable");
-                    f.setAccessible(true);
-                    algIdNameTable = f.get(null);
-                    if (algIdNameTable != null) {
-                        Map<ObjectIdentifier,String> nameTable = (Map<ObjectIdentifier,String>)algIdNameTable;
-                        nameTable.put(SHA512_224_oid, "SHA-512/224");
-                        nameTable.put(SHA512_256_oid, "SHA-512/256");
-                        nameTable.put(sha512_224WithRSAEncryption_oid, "SHA512/224withRSA");
-                        nameTable.put(sha512_256WithRSAEncryption_oid, "SHA512/256withRSA");
-                        nameTable.put(RSASSA_PSS_oid, "RSASSA-PSS");
-                        nameTable.put(RSAES_OAEP_oid, "RSAES-OAEP");
-                    }
-                }catch(Exception e) {
-                    // can not update nameTable
-                }
                 return null;
             }
         });
@@ -197,29 +179,29 @@ public abstract class OpenJSSE extends Provider {
     private void doRegister(boolean isfips) {
         if (isfips == false) {
             put("KeyFactory.RSA",
-                "org.openjsse.sun.security.rsa.RSAKeyFactory$Legacy");
+                "sun.security.rsa.RSAKeyFactory$Legacy");
             put("Alg.Alias.KeyFactory.1.2.840.113549.1.1", "RSA");
             put("Alg.Alias.KeyFactory.OID.1.2.840.113549.1.1", "RSA");
 
             put("KeyPairGenerator.RSA",
-                "org.openjsse.sun.security.rsa.RSAKeyPairGenerator$Legacy");
+                "sun.security.rsa.RSAKeyPairGenerator$Legacy");
             put("Alg.Alias.KeyPairGenerator.1.2.840.113549.1.1", "RSA");
             put("Alg.Alias.KeyPairGenerator.OID.1.2.840.113549.1.1", "RSA");
 
             put("Signature.MD2withRSA",
-                "org.openjsse.sun.security.rsa.RSASignature$MD2withRSA");
+                "sun.security.rsa.RSASignature$MD2withRSA");
             put("Alg.Alias.Signature.1.2.840.113549.1.1.2", "MD2withRSA");
             put("Alg.Alias.Signature.OID.1.2.840.113549.1.1.2",
                 "MD2withRSA");
 
             put("Signature.MD5withRSA",
-                "org.openjsse.sun.security.rsa.RSASignature$MD5withRSA");
+                "sun.security.rsa.RSASignature$MD5withRSA");
             put("Alg.Alias.Signature.1.2.840.113549.1.1.4", "MD5withRSA");
             put("Alg.Alias.Signature.OID.1.2.840.113549.1.1.4",
                 "MD5withRSA");
 
             put("Signature.SHA1withRSA",
-                "org.openjsse.sun.security.rsa.RSASignature$SHA1withRSA");
+                "sun.security.rsa.RSASignature$SHA1withRSA");
             put("Alg.Alias.Signature.1.2.840.113549.1.1.5", "SHA1withRSA");
             put("Alg.Alias.Signature.OID.1.2.840.113549.1.1.5",
                 "SHA1withRSA");
@@ -228,7 +210,7 @@ public abstract class OpenJSSE extends Provider {
 
         }
         put("Signature.MD5andSHA1withRSA",
-            "org.openjsse.sun.security.ssl.RSASignature");
+            "sun.security.ssl.RSASignature");
 
         put("Cipher.ChaCha20",
             "org.openjsse.com.sun.crypto.provider.ChaCha20Cipher$ChaCha20Only");
@@ -322,32 +304,7 @@ public abstract class OpenJSSE extends Provider {
         put("Alg.Alias.KeyGenerator.SunTls12RsaPremasterSecret",
             "SunTlsRsaPremasterSecret");
 
-        // attributes for supported key classes
-        put("Signature.SHA512/224withRSA",
-                "org.openjsse.sun.security.rsa.RSASignature$SHA512_224withRSA");
-        put("Signature.SHA512/256withRSA",
-                "org.openjsse.sun.security.rsa.RSASignature$SHA512_256withRSA");
-        put("Signature.MD5andSHA1withRSA",
-            "org.openjsse.sun.security.ssl.RSASignature");
-        put("Signature.RSASSA-PSS",
-                "org.openjsse.sun.security.rsa.RSAPSSSignature");
-        String rsaKeyClasses = "java.security.interfaces.RSAPublicKey" +
-                "|java.security.interfaces.RSAPrivateKey";
-        put("Signature.SHA512/224withRSA SupportedKeyClasses", rsaKeyClasses);
-        put("Signature.SHA512/256withRSA SupportedKeyClasses", rsaKeyClasses);
-        put("Signature.RSASSA-PSS SupportedKeyClasses", rsaKeyClasses);
-
-        put("KeyFactory.RSASSA-PSS",
-                "org.openjsse.sun.security.rsa.RSAKeyFactory$PSS");
-        put("KeyPairGenerator.RSASSA-PSS",
-                "org.openjsse.sun.security.rsa.RSAKeyPairGenerator$PSS");
-        put("AlgorithmParameters.RSASSA-PSS",
-                "org.openjsse.sun.security.rsa.PSSParameters");
-
         if (PROVIDER_VER == 1.8d) {
-            put("MessageDigest.SHA-512/224", "org.openjsse.sun.security.provider.SHA5$SHA512_224");
-            put("MessageDigest.SHA-512/256", "org.openjsse.sun.security.provider.SHA5$SHA512_256");
-
             put("MessageDigest.SHA3-224", "org.openjsse.sun.security.provider.SHA3$SHA224");
             put("MessageDigest.SHA3-256", "org.openjsse.sun.security.provider.SHA3$SHA256");
             put("MessageDigest.SHA3-384", "org.openjsse.sun.security.provider.SHA3$SHA384");
@@ -355,23 +312,6 @@ public abstract class OpenJSSE extends Provider {
         }
 
         // aliases
-        put("Alg.Alias.Signature.1.2.840.113549.1.1.15",     "SHA512/224withRSA");
-        put("Alg.Alias.Signature.OID.1.2.840.113549.1.1.15", "SHA512/224withRSA");
-        put("Alg.Alias.Signature.1.2.840.113549.1.1.16",     "SHA512/256withRSA");
-        put("Alg.Alias.Signature.OID.1.2.840.113549.1.1.16", "SHA512/256withRSA");
-
-        put("Alg.Alias.KeyFactory.1.2.840.113549.1.1.10",     "RSASSA-PSS");
-        put("Alg.Alias.KeyFactory.OID.1.2.840.113549.1.1.10", "RSASSA-PSS");
-
-        put("Alg.Alias.KeyPairGenerator.1.2.840.113549.1.1.10",     "RSASSA-PSS");
-        put("Alg.Alias.KeyPairGenerator.OID.1.2.840.113549.1.1.10", "RSASSA-PSS");
-
-        put("Alg.Alias.Signature.1.2.840.113549.1.1.10",     "RSASSA-PSS");
-        put("Alg.Alias.Signature.OID.1.2.840.113549.1.1.10", "RSASSA-PSS");
-
-        put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.1.10",     "RSASSA-PSS");
-        put("Alg.Alias.AlgorithmParameters.OID.1.2.840.113549.1.1.10", "RSASSA-PSS");
-
         put("Alg.Alias.MessageDigest.2.16.840.1.101.3.4.2.7", "SHA3-224");
         put("Alg.Alias.MessageDigest.OID.2.16.840.1.101.3.4.2.7",
                 "SHA3-224");
@@ -384,12 +324,6 @@ public abstract class OpenJSSE extends Provider {
         put("Alg.Alias.MessageDigest.2.16.840.1.101.3.4.2.10", "SHA3-512");
         put("Alg.Alias.MessageDigest.OID.2.16.840.1.101.3.4.2.10",
                 "SHA3-512");
-        put("Alg.Alias.MessageDigest.2.16.840.1.101.3.4.2.5", "SHA-512/224");
-        put("Alg.Alias.MessageDigest.OID.2.16.840.1.101.3.4.2.5",
-                "SHA-512/224");
-        put("Alg.Alias.MessageDigest.2.16.840.1.101.3.4.2.6", "SHA-512/256");
-        put("Alg.Alias.MessageDigest.OID.2.16.840.1.101.3.4.2.6",
-                "SHA-512/256");
         }
 
     // com.sun.net.ssl.internal.ssl.Provider has been deprecated since JDK 9
@@ -416,18 +350,4 @@ public abstract class OpenJSSE extends Provider {
             }
         });
     }
-
-    private static final ObjectIdentifier SHA512_224_oid =
-					    oid(2, 16, 840, 1, 101, 3, 4, 2, 5);
-    private static final ObjectIdentifier SHA512_256_oid =
-					    oid(2, 16, 840, 1, 101, 3, 4, 2, 6);
-    private static final ObjectIdentifier sha512_224WithRSAEncryption_oid =
-                                            oid(1, 2, 840, 113549, 1, 1, 15);
-    private static final ObjectIdentifier sha512_256WithRSAEncryption_oid =
-                                            oid(1, 2, 840, 113549, 1, 1, 16);;
-    private static final ObjectIdentifier RSAES_OAEP_oid =
-                                            oid(1, 2, 840, 113549, 1, 1, 7);
-    private static final ObjectIdentifier RSASSA_PSS_oid =
-                                            oid(1, 2, 840, 113549, 1, 1, 10);
-
 }

@@ -196,7 +196,6 @@ final class CertificateAuthorityExtension {
             for(X500Principal ca: chc.localSupportedAuthorities) {
                 vectorLen += ca.getEncoded().length + 2;
             }
-
             byte[] extData = new byte[vectorLen+2];
             ByteBuffer m = ByteBuffer.wrap(extData);
             Record.putInt16(m, vectorLen);

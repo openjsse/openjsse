@@ -56,12 +56,10 @@ import java.security.spec.AlgorithmParameterSpec;
 
 /**
  * This class extends java.security.spec.RSAPrivateKeySpec class
- * to implement RSASSA-PSS signature algorithms
+ * for backward compatibility with early versions of OpenJSSE
  */
 
 public class RSAPrivateKeySpec extends java.security.spec.RSAPrivateKeySpec {
-
-    private final AlgorithmParameterSpec params;
 
     /**
      * Creates a new RSAPrivateKeySpec.
@@ -70,7 +68,7 @@ public class RSAPrivateKeySpec extends java.security.spec.RSAPrivateKeySpec {
      * @param privateExponent the private exponent
      */
     public RSAPrivateKeySpec(BigInteger modulus, BigInteger privateExponent) {
-        this(modulus, privateExponent, null);
+        super(modulus, privateExponent);
     }
 
     /**
@@ -83,18 +81,6 @@ public class RSAPrivateKeySpec extends java.security.spec.RSAPrivateKeySpec {
      */
     public RSAPrivateKeySpec(BigInteger modulus, BigInteger privateExponent,
             AlgorithmParameterSpec params) {
-        super(modulus, privateExponent);
-        this.params = params;
-    }
-
-    /**
-     * Returns the parameters associated with this key, may be null if not
-     * present.
-     *
-     * @return the parameters associated with this key
-     * @since 11
-     */
-    public AlgorithmParameterSpec getParams() {
-        return this.params;
+        super(modulus, privateExponent, params);
     }
 }

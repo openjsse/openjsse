@@ -28,9 +28,6 @@ package org.openjsse.util;
 
 import java.security.interfaces.RSAKey;
 import java.security.spec.AlgorithmParameterSpec;
-import org.openjsse.sun.security.rsa.RSAPrivateKeyImpl;
-import org.openjsse.sun.security.rsa.RSAPrivateCrtKeyImpl;
-import org.openjsse.sun.security.rsa.RSAPublicKeyImpl;
 
 /**
  * Utility class to access parameters associated with RSA key.
@@ -48,14 +45,7 @@ public class RSAKeyUtil {
      * @return the associated parameters, may be null
      */
     public static AlgorithmParameterSpec getParams(RSAKey rsaKey) {
-        AlgorithmParameterSpec keyParams = null;
-        if (rsaKey instanceof RSAPublicKeyImpl)
-            keyParams = ((RSAPublicKeyImpl) rsaKey).getParams();
-        else if (rsaKey instanceof RSAPrivateCrtKeyImpl)
-            keyParams = ((RSAPrivateCrtKeyImpl) rsaKey).getParams();
-        else if (rsaKey instanceof RSAPrivateKeyImpl)
-            keyParams = ((RSAPrivateKeyImpl) rsaKey).getParams();
-        return keyParams;
+        return rsaKey.getParams();
     }
 
 

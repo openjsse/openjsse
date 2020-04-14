@@ -62,6 +62,7 @@ import sun.security.action.GetPropertyAction;
 import sun.security.provider.certpath.AlgorithmChecker;
 import sun.security.provider.certpath.PKIXExtendedParameters;
 import sun.security.validator.ValidatorException;
+import sun.security.x509.X509CertImpl;
 
 /**
  * Validator implementation built on the PKIX CertPath API. This
@@ -385,7 +386,7 @@ public final class PKIXValidator extends Validator {
             // JDK8 use custom X509CertImpl to validate RSASSA-PSS signed cert
             X509Certificate[] newChain = new X509Certificate[chain.length];
             for(int i=0; i<chain.length; i++) {
-               newChain[i] = new org.openjsse.sun.security.x509.X509CertImpl(chain[i].getEncoded());
+               newChain[i] = new X509CertImpl(chain[i].getEncoded());
             }
             CertPath path = factory.generateCertPath(Arrays.asList(newChain));
             certPathLength = chain.length;
