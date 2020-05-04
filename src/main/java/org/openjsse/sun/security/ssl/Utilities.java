@@ -143,6 +143,26 @@ final class Utilities {
         }
     }
 
+    /**
+     * Return the value of the unsigned integer System property propName.
+     *
+     * Note use of privileged action. Do NOT make accessible to applications.
+     */
+    static int getUIntProperty(String propName, int defaultValue) {
+        // if set, require positive integer value
+        String val = GetPropertyAction.privilegedGetProperty(propName);
+        int value=defaultValue;
+        if (val != null && !val.isEmpty()) {
+            try {
+                value = Integer.parseUnsignedInt(val);
+            } catch(NumberFormatException e) {
+                throw new RuntimeException("Value of " + propName
+                        + " must be unsigned integer");
+            }
+        }
+        return value;
+    }
+
     static String indent(String source) {
         return Utilities.indent(source, indent);
     }

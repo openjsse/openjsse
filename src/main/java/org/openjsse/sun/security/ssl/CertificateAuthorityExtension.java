@@ -157,6 +157,13 @@ final class CertificateAuthorityExtension {
      */
     private static final
             class CHCertificateAuthoritiesProducer implements HandshakeProducer {
+
+        private final boolean enableCAExtension = Utilities.getBooleanProperty(
+                "org.openjsse.client.enableCAExtension", false);
+
+        private final int maxCAExtensionSize = Utilities.getUIntProperty(
+                "org.openjsse.client.maxCAExtensionSize", 8192);
+
         // Prevent instantiation of this class.
         private CHCertificateAuthoritiesProducer() {
             // blank
@@ -177,6 +184,13 @@ final class CertificateAuthorityExtension {
                 }
                 return null;
             }
+            if (!enableCAExtension) {
+                if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
+                    SSLLogger.fine(
+                            "Ignore disabled certificate_authorities extension");
+                }
+                return null;
+            }
 
             // Produce the extension.
             if (chc.localSupportedAuthorities == null) {
@@ -193,14 +207,21 @@ final class CertificateAuthorityExtension {
             if (chc.localSupportedAuthorities == null)
                 return null;
             int vectorLen = 0;
+            List<byte[]> authorities = new ArrayList<byte[]>();
             for(X500Principal ca: chc.localSupportedAuthorities) {
-                vectorLen += ca.getEncoded().length + 2;
+                byte enc[] = ca.getEncoded();
+                int len = enc.length + 2;
+                if ((vectorLen + len) <=  maxCAExtensionSize) {
+                    vectorLen += len;
+                    authorities.add(enc);
+                }
             }
+
             byte[] extData = new byte[vectorLen+2];
             ByteBuffer m = ByteBuffer.wrap(extData);
             Record.putInt16(m, vectorLen);
-            for (X500Principal ca : chc.localSupportedAuthorities) {
-                Record.putBytes16(m,ca.getEncoded());
+            for (byte[] enc : authorities) {
+                Record.putBytes16(m,enc);
             }
             // Update the context.
             chc.handshakeExtensions.put(
@@ -290,6 +311,13 @@ final class CertificateAuthorityExtension {
      */
     private static final
             class CRCertificateAuthoritiesProducer implements HandshakeProducer {
+
+        private final boolean enableCAExtension = Utilities.getBooleanProperty(
+                "org.openjsse.server.enableCAExtension", true);
+
+        private final int maxCAExtensionSize = Utilities.getUIntProperty(
+                "org.openjsse.server.maxCAExtensionSize", 8192);
+
         // Prevent instantiation of this class.
         private CRCertificateAuthoritiesProducer() {
             // blank
@@ -309,6 +337,14 @@ final class CertificateAuthorityExtension {
                         "for client certificate authentication");
             }
 
+            if (!enableCAExtension) {
+                if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
+                    SSLLogger.fine(
+                            "Ignore disabled certificate_authorities extension");
+                }
+                return null;
+            }
+
             // Produce the extension.
             if (shc.localSupportedAuthorities == null) {
                 X509Certificate[] caCerts = shc.sslContext.getX509TrustManager().getAcceptedIssuers();
@@ -324,15 +360,21 @@ final class CertificateAuthorityExtension {
                 return null;
 
             int vectorLen = 0;
+            List<byte[]> authorities = new ArrayList<byte[]>();
             for(X500Principal ca: shc.localSupportedAuthorities) {
-                vectorLen += ca.getEncoded().length + 2;
+                byte enc[] = ca.getEncoded();
+                int len = enc.length + 2;
+                if ((vectorLen + len) <=  maxCAExtensionSize) {
+                    vectorLen += len;
+                    authorities.add(enc);
+                }
             }
 
             byte[] extData = new byte[vectorLen+2];
             ByteBuffer m = ByteBuffer.wrap(extData);
             Record.putInt16(m, vectorLen);
-            for (X500Principal ca : shc.localSupportedAuthorities) {
-                Record.putBytes16(m,ca.getEncoded());
+            for (byte[] enc : authorities) {
+                Record.putBytes16(m,enc);
             }
             // Update the context.
             shc.handshakeExtensions.put(
