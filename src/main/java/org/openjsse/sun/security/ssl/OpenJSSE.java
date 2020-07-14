@@ -82,15 +82,9 @@ public abstract class OpenJSSE extends Provider {
 
     static {
         PROVIDER_VER = Double.parseDouble(System.getProperty("java.specification.version"));
-        if (PROVIDER_VER == 1.8d) {
-            info = "JDK JSSE provider" +
-                   "(PKCS12, SunX509/PKIX key/trust factories, " +
-                   "SSLv3/TLSv1/TLSv1.1/TLSv1.2/TLSv1.3)";
-        } else {
-            info = "JDK JSSE provider" +
-                   "(PKCS12, SunX509/PKIX key/trust factories, " +
-                   "SSLv3/TLSv1/TLSv1.1/TLSv1.2/TLSv1.3/DTLSv1.0/DTLSv1.2)";
-        }
+        info = "JDK JSSE provider" +
+               "(PKCS12, SunX509/PKIX key/trust factories, " +
+               "SSLv3/TLSv1/TLSv1.1/TLSv1.2/TLSv1.3)";
     }
     protected static synchronized boolean isFIPS() {
         if (fips == null) {
@@ -254,15 +248,6 @@ public abstract class OpenJSSE extends Provider {
         if (isfips == false) {
             put("Alg.Alias.SSLContext.SSL", "TLS");
             put("Alg.Alias.SSLContext.SSLv3", "TLSv1");
-        }
-
-        if (PROVIDER_VER > 1.8d) {
-            put("SSLContext.DTLSv1.0",
-                "org.openjsse.sun.security.ssl.SSLContextImpl$DTLS10Context");
-            put("SSLContext.DTLSv1.2",
-                "org.openjsse.sun.security.ssl.SSLContextImpl$DTLS12Context");
-            put("SSLContext.DTLS",
-                "org.openjsse.sun.security.ssl.SSLContextImpl$DTLSContext");
         }
 
         put("SSLContext.Default",
