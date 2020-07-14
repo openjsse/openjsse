@@ -101,6 +101,7 @@ final class CertSignAlgsExtension {
             if (chc.localSupportedSignAlgs == null) {
                 chc.localSupportedSignAlgs =
                     SignatureScheme.getSupportedAlgorithms(
+                            chc.sslConfig,
                             chc.algorithmConstraints, chc.activeProtocols);
             }
 
@@ -194,6 +195,7 @@ final class CertSignAlgsExtension {
             // update the context
             List<SignatureScheme> schemes =
                     SignatureScheme.getSupportedAlgorithms(
+                            shc.sslConfig,
                             shc.algorithmConstraints, shc.negotiatedProtocol,
                             spec.signatureSchemes);
             shc.peerRequestedCertSignSchemes = schemes;
@@ -248,6 +250,7 @@ final class CertSignAlgsExtension {
             protocols = Collections.unmodifiableList(protocols);
             List<SignatureScheme> sigAlgs =
                     SignatureScheme.getSupportedAlgorithms(
+                            shc.sslConfig,
                             shc.algorithmConstraints, protocols);
 
             int vectorLen = SignatureScheme.sizeInRecord() * sigAlgs.size();
@@ -338,6 +341,7 @@ final class CertSignAlgsExtension {
             // update the context
             List<SignatureScheme> schemes =
                     SignatureScheme.getSupportedAlgorithms(
+                            chc.sslConfig,
                             chc.algorithmConstraints, chc.negotiatedProtocol,
                             spec.signatureSchemes);
             chc.peerRequestedCertSignSchemes = schemes;
