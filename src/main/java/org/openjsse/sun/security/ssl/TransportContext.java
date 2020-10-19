@@ -265,7 +265,7 @@ class TransportContext implements ConnectionContext {
                 (handshakeContext instanceof PostHandshakeContext);
     }
 
-    // Note: close_notify is delivered as a warning alert.
+    // Note: Don't use this method for close_nofity, use closeNotify() instead.
     void warning(Alert alert) {
         // For initial handshaking, don't send a warning alert message to peer
         // if handshaker has not started.
@@ -276,6 +276,30 @@ class TransportContext implements ConnectionContext {
                 if (SSLLogger.isOn && SSLLogger.isOn("ssl")) {
                     SSLLogger.warning(
                         "Warning: failed to send warning alert " + alert, ioe);
+                }
+            }
+        }
+    }
+
+    // Note: close_notify is delivered as a warning alert.
+    void closeNotify(boolean isUserCanceled) throws IOException {
+        // Socket transport is special because of the SO_LINGER impact.
+        if (transport instanceof SSLSocketImpl) {
+            ((SSLSocketImpl)transport).closeNotify(isUserCanceled);
+        } else {
+            // Need a lock here so that the user_canceled alert and the
+            // close_notify alert can be delivered together.
+            synchronized (outputRecord) {
+                try {
+                    // send a user_canceled alert if needed.
+                    if (isUserCanceled) {
+                        warning(Alert.USER_CANCELED);
+                    }
+
+                    // send a close_notify alert
+                    warning(Alert.CLOSE_NOTIFY);
+                } finally {
+                    outputRecord.close();
                 }
             }
         }
@@ -528,14 +552,7 @@ class TransportContext implements ConnectionContext {
             }
 
             if (needCloseNotify) {
-                synchronized (outputRecord) {
-                    try {
-                        // send a close_notify alert
-                        warning(Alert.CLOSE_NOTIFY);
-                    } finally {
-                        outputRecord.close();
-                    }
-                }
+                closeNotify(false);
             }
         }
     }
@@ -571,21 +588,7 @@ class TransportContext implements ConnectionContext {
             useUserCanceled = true;
         }
 
-        // Need a lock here so that the user_canceled alert and the
-        // close_notify alert can be delivered together.
-        synchronized (outputRecord) {
-            try {
-                // send a user_canceled alert if needed.
-                if (useUserCanceled) {
-                    warning(Alert.USER_CANCELED);
-                }
-
-                // send a close_notify alert
-                warning(Alert.CLOSE_NOTIFY);
-            } finally {
-                outputRecord.close();
-            }
-        }
+        closeNotify(useUserCanceled);
     }
 
     // Note; HandshakeStatus.FINISHED status is retrieved in other places.
