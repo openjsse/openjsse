@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -68,6 +68,7 @@ import javax.net.ssl.SNIServerName;
 import org.openjsse.javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
 import org.openjsse.javax.net.ssl.SSLSocket;
+import sun.security.action.GetIntegerAction;
 import sun.security.action.GetPropertyAction;
 import org.openjsse.sun.security.ssl.SSLExtension.ClientExtensions;
 import org.openjsse.sun.security.ssl.SSLExtension.ServerExtensions;
@@ -128,6 +129,16 @@ final class SSLConfiguration implements Cloneable {
     // Respond a close_notify alert if receiving close_notify alert.
     static final boolean acknowledgeCloseNotify  = Utilities.getBooleanProperty(
             "jdk.tls.acknowledgeCloseNotify", false);
+
+    // Set the max size limit for Handshake Message to 2^15
+    static final int maxHandshakeMessageSize =
+           (java.security.AccessController.doPrivileged(
+               new GetIntegerAction("jdk.tls.maxHandshakeMessageSize", 32768))).intValue();
+
+    // Set the max certificate chain length to 10
+    static final int maxCertificateChainLength =
+           (java.security.AccessController.doPrivileged(
+               new GetIntegerAction("jdk.tls.maxCertificateChainLength", 10))).intValue();
 
     // Is the extended_master_secret extension supported?
     static {
