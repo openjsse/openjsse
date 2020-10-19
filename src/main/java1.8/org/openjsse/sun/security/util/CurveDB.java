@@ -54,19 +54,33 @@ public class CurveDB {
     public static ECParameterSpec lookup(String name) {
     	synchronized(lookupByNameLock) {
 	    	if (lookupByName == null) {
-	    		try {
-	    			Class clazz = Class.forName("sun.security.ec.CurveDB");
-	    			lookupByName = Optional.ofNullable( clazz.getDeclaredMethod("lookup", String.class));
-	    			makeAccessible(lookupByName.get());
-	    		} catch(ClassNotFoundException | NoSuchMethodException | SecurityException e) {
-	    			lookupByName = Optional.empty();
-	    		}
+				lookupByName = (Optional<Method>)AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					@Override
+					public Optional<Method> run() {
+						Optional<Method> lookupByName = null;
+						try {
+							Class clazz = null;
+							try {
+								clazz = Class.forName("sun.security.ec.CurveDB");
+							} catch(ClassNotFoundException cnfe) {
+								clazz = Class.forName("sun.security.util.CurveDB");
+							}
+							lookupByName = Optional.ofNullable( clazz.getDeclaredMethod("lookup", String.class));
+							makeAccessible(lookupByName.get());
+							return lookupByName;
+						} catch(ClassNotFoundException | NoSuchMethodException | SecurityException e) {
+							lookupByName = Optional.empty();
+						}
+						return lookupByName;
+					}
+				});
 	    	}
 	    }
-	    if (lookupByName.isPresent())
-	    	try {
-	    		return (ECParameterSpec)lookupByName.get().invoke(null, name);
-	    	} catch(IllegalAccessException | InvocationTargetException e){};
+	    if (lookupByName.isPresent()) {
+			try {
+				return (ECParameterSpec) lookupByName.get().invoke(null, name);
+			} catch (IllegalAccessException | InvocationTargetException e) {};
+		}
         return null;
     }
     // Convert the given ECParameterSpec object to a NamedCurve object.
@@ -74,13 +88,25 @@ public class CurveDB {
     public static ECParameterSpec lookup(ECParameterSpec params) {
     	synchronized(lookupByParamLock) {
 	    	if (lookupByParam == null) {
-	    		try {
-	    			Class clazz = Class.forName("sun.security.ec.CurveDB");
-	    			lookupByParam = Optional.ofNullable( clazz.getDeclaredMethod("lookup", ECParameterSpec.class));
-	    			makeAccessible(lookupByParam.get());
-	    		} catch(ClassNotFoundException | NoSuchMethodException | SecurityException e) {
-	    			lookupByParam = Optional.empty();
-	    		}
+				lookupByParam = (Optional<Method>)AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					@Override
+					public Optional<Method> run() {
+						Optional<Method> lookupByParam = null;
+						try {
+							Class clazz = null;
+							try {
+								clazz = Class.forName("sun.security.ec.CurveDB");
+							} catch (ClassNotFoundException cnfe) {
+								clazz = Class.forName("sun.security.util.CurveDB");
+							}
+							lookupByParam = Optional.ofNullable(clazz.getDeclaredMethod("lookup", ECParameterSpec.class));
+							makeAccessible(lookupByParam.get());
+						} catch (ClassNotFoundException | NoSuchMethodException | SecurityException e) {
+							lookupByParam = Optional.empty();
+						}
+						return lookupByParam;
+					}
+				});
 	    	}
 	    }
 	    if (lookupByParam.isPresent())
