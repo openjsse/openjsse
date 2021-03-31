@@ -1636,13 +1636,13 @@ final class AbstractTrustManagerWrapper extends X509ExtendedTrustManager
                             extSession.getLocalSupportedSignatureAlgorithms();
 
                     constraints = new SSLAlgorithmConstraints(
-                                    (org.openjsse.javax.net.ssl.SSLEngine)engine, peerSupportedSignAlgs, true);
+                                    engine, peerSupportedSignAlgs, true);
                 } else {
                     constraints =
-                            new SSLAlgorithmConstraints((org.openjsse.javax.net.ssl.SSLEngine)engine, true);
+                            new SSLAlgorithmConstraints(engine, true);
                 }
             } else {
-                constraints = new SSLAlgorithmConstraints((org.openjsse.javax.net.ssl.SSLEngine)engine, true);
+                constraints = new SSLAlgorithmConstraints(engine, true);
             }
 
             checkAlgorithmConstraints(chain, constraints, checkClientTrusted);

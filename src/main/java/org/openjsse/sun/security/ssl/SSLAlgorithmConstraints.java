@@ -76,7 +76,7 @@ final class SSLAlgorithmConstraints implements AlgorithmConstraints {
         this.enabledX509DisabledAlgConstraints = withDefaultCertPathConstraints;
     }
 
-    SSLAlgorithmConstraints(SSLEngine engine,
+    SSLAlgorithmConstraints(javax.net.ssl.SSLEngine engine,
             boolean withDefaultCertPathConstraints) {
         this.userSpecifiedConstraints = getUserSpecifiedConstraints(engine);
         this.peerSpecifiedConstraints = null;
@@ -91,7 +91,7 @@ final class SSLAlgorithmConstraints implements AlgorithmConstraints {
         this.enabledX509DisabledAlgConstraints = withDefaultCertPathConstraints;
     }
 
-    SSLAlgorithmConstraints(SSLEngine engine, String[] supportedAlgorithms,
+    SSLAlgorithmConstraints(javax.net.ssl.SSLEngine engine, String[] supportedAlgorithms,
             boolean withDefaultCertPathConstraints) {
         this.userSpecifiedConstraints = getUserSpecifiedConstraints(engine);
         this.peerSpecifiedConstraints =
@@ -100,7 +100,7 @@ final class SSLAlgorithmConstraints implements AlgorithmConstraints {
     }
 
     private static AlgorithmConstraints getUserSpecifiedConstraints(
-            SSLEngine engine) {
+            javax.net.ssl.SSLEngine engine) {
         if (engine != null) {
             // Note that the KeyManager or TrustManager implementation may be
             // not implemented in the same provider as SSLSocket/SSLEngine.

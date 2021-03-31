@@ -268,9 +268,9 @@ final class X509TrustManagerImpl extends X509ExtendedTrustManager
                         extSession.getLocalSupportedSignatureAlgorithms();
 
                 constraints = new SSLAlgorithmConstraints(
-                                (org.openjsse.javax.net.ssl.SSLEngine)engine, localSupportedSignAlgs, false);
+                                engine, localSupportedSignAlgs, false);
             } else {
-                constraints = new SSLAlgorithmConstraints((org.openjsse.javax.net.ssl.SSLEngine)engine, false);
+                constraints = new SSLAlgorithmConstraints(engine, false);
             }
 
             // Grab any stapled OCSP responses for use in validation

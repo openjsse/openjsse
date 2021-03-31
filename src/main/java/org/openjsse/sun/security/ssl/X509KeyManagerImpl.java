@@ -234,12 +234,12 @@ final class X509KeyManagerImpl extends X509ExtendedKeyManager
                     }
 
                     return new SSLAlgorithmConstraints(
-                        (org.openjsse.javax.net.ssl.SSLEngine)engine, peerSupportedSignAlgs, true);
+                        engine, peerSupportedSignAlgs, true);
                 }
             }
         }
 
-        return new SSLAlgorithmConstraints((org.openjsse.javax.net.ssl.SSLEngine)engine, true);
+        return new SSLAlgorithmConstraints(engine, true);
     }
 
     private X500Principal[] getCertificateAuthorities(Socket socket) {
