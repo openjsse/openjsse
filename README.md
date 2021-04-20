@@ -35,3 +35,25 @@ license, as described in the LICENSE file at the base of this repository
 and in notices found in the various source files.
 
 The project is created and actively supported by engineers from [Azul Systems](https://azul.com).
+
+
+----
+### OpenJDK 8 to OpenJSSE version mapping
+
+| OpenJDK8u | OpenJSSE |
+|-----------|--------------|
+| 1.8.0_222 | 1.1.0        |
+| 1.8.0_231 | 1.1.1        |
+| 1.8.0_232 | 1.1.1        |
+| 1.8.0_241 | 1.1.2        |
+| 1.8.0_242 | 1.1.2        |
+| 1.8.0_251 | 1.1.2        |
+| 1.8.0_252 | 1.1.3        |
+| 1.8.0_261 | 1.1.4        |
+| 1.8.0_262 | 1.1.4        |
+| 1.8.0_271 | 1.1.5        |
+| 1.8.0_272 | 1.1.5        |
+| 1.8.0_281 | 1.1.5        |
+| 1.8.0_282 | 1.1.5        |
+| 1.8.0_291 | 1.1.6        |
+| 1.8.0_292 | 1.1.6        |
