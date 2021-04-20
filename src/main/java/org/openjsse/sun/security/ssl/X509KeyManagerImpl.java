@@ -894,7 +894,7 @@ final class X509KeyManagerImpl extends X509ExtendedKeyManager
             String variant) {
 
         AlgorithmChecker checker =
-                new AlgorithmChecker(constraints, null, variant);
+                new AlgorithmChecker(constraints, variant);
         try {
             checker.init(false);
         } catch (CertPathValidatorException cpve) {
