@@ -398,24 +398,17 @@ final class PreSharedKeyExtension {
                         shc.sslContext.engineGetServerSessionContext();
                 int idIndex = 0;
                 for (PskIdentity requestedId : pskSpec.identities) {
-                    SSLSessionImpl s = sessionCache.get(requestedId.identity);
+                    SSLSessionImpl s = sessionCache.pull(requestedId.identity);
                     if (s != null && canRejoin(clientHello, shc, s)) {
-                        // Can not perform concurrent PSK session resumptions for the same identity
-                        // Remove resuming session from the session cache
-                        synchronized (sessionCache) {
-                            SSLSessionImpl rs = sessionCache.get(requestedId.identity);
-                            if (rs == s) {
-                                if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
-                                    SSLLogger.fine("Resuming session: ", s);
-                                }
-                                sessionCache.remove(s.getSessionId());
-                                // binder will be checked later
-                                shc.resumingSession = s;
-                                shc.handshakeExtensions.put(SH_PRE_SHARED_KEY,
-                                    new SHPreSharedKeySpec(idIndex));   // for the index
-                                break;
-                            }
+                        if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
+                            SSLLogger.fine("Resuming session: ", s);
                         }
+
+                        // binder will be checked later
+                        shc.resumingSession = s;
+                        shc.handshakeExtensions.put(SH_PRE_SHARED_KEY,
+                            new SHPreSharedKeySpec(idIndex));   // for the index
+                        break;
                     }
 
                     ++idIndex;
@@ -566,8 +559,8 @@ final class PreSharedKeyExtension {
     private static void checkBinder(ServerHandshakeContext shc,
             SSLSessionImpl session,
             HandshakeHash pskBinderHash, byte[] binder) throws IOException {
-         SecretKey psk = session.getPreSharedKey();
-         if (psk == null) {
+        SecretKey psk = session.getPreSharedKey();
+        if (psk == null) {
             throw shc.conContext.fatal(Alert.INTERNAL_ERROR,
                     "Session has no PSK");
         }

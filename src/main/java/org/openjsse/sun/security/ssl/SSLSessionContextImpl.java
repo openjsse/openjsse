@@ -31,7 +31,7 @@ import java.util.Enumeration;
 import java.util.Locale;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSessionContext;
-import sun.security.util.Cache;
+import org.openjsse.sun.security.util.Cache;
 
 
 final class SSLSessionContextImpl implements SSLSessionContext {
@@ -140,6 +140,15 @@ final class SSLSessionContextImpl implements SSLSessionContext {
     // package-private method, used ONLY by ServerHandshaker
     SSLSessionImpl get(byte[] id) {
         return (SSLSessionImpl)getSession(id);
+    }
+
+    // package-private method, find and remove session from cache
+    // return found session
+    SSLSessionImpl pull(byte[] id) {
+        if (id != null) {
+            return sessionCache.pull(new SessionId(id));
+        }
+        return null;
     }
 
     // package-private method, used ONLY by ClientHandshaker

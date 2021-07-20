@@ -52,7 +52,7 @@ import sun.security.provider.certpath.CertId;
 import sun.security.provider.certpath.OCSP;
 import sun.security.provider.certpath.OCSPResponse;
 import sun.security.provider.certpath.ResponderId;
-import sun.security.util.Cache;
+import org.openjsse.sun.security.util.Cache;
 import sun.security.x509.PKIXExtensions;
 import sun.security.x509.SerialNumber;
 import org.openjsse.sun.security.ssl.X509Authentication.X509Possession;
