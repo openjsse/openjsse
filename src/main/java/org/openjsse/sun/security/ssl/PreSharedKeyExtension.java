@@ -58,7 +58,6 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Collection;
 import javax.crypto.Mac;
@@ -568,7 +567,7 @@ final class PreSharedKeyExtension {
         SecretKey binderKey = deriveBinderKey(shc, psk, session);
         byte[] computedBinder =
                 computeBinder(shc, binderKey, session, pskBinderHash);
-        if (!Arrays.equals(binder, computedBinder)) {
+        if (!MessageDigest.isEqual(binder, computedBinder)) {
             throw shc.conContext.fatal(Alert.ILLEGAL_PARAMETER,
                     "Incorect PSK binder value");
         }

@@ -51,10 +51,12 @@
 
 package org.openjsse.sun.security.ssl;
 
+import org.openjsse.sun.security.util.ByteArrays;
+
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
-import java.util.Arrays;
 
 /*
  * RandomCookie ... SSL hands standard format random cookies (nonces)
@@ -137,7 +139,7 @@ final class RandomCookie {
     }
 
     boolean isHelloRetryRequest() {
-        return Arrays.equals(hrrRandomBytes, randomBytes);
+        return MessageDigest.isEqual(hrrRandomBytes, randomBytes);
     }
 
     // Used for client random validation of version downgrade protection.
@@ -156,10 +158,10 @@ final class RandomCookie {
     }
 
     private boolean isT12Downgrade() {
-        return Utilities.equals(randomBytes, 24, 32, t12Protection, 0, 8);
+        return ByteArrays.isEqual(randomBytes, 24, 32, t12Protection, 0, 8);
     }
 
     private boolean isT11Downgrade() {
-        return Utilities.equals(randomBytes, 24, 32, t11Protection, 0, 8);
+        return ByteArrays.isEqual(randomBytes, 24, 32, t11Protection, 0, 8);
     }
 }

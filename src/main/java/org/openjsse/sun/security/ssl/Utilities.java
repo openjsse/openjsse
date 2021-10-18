@@ -255,12 +255,4 @@ final class Utilities {
         }
         return b;
     }
-    //JDK8 Arrays.equals()
-    static boolean equals(byte[] arr1, int st1, int end1, byte[] arr2, int st2, int end2) {
-        for(int i=st1, j=st2; i<end1 && j<end2; i++, j++)
-            if(arr1[i] != arr2[j])
-                return false;
-        return true;
-    }
-
 }
