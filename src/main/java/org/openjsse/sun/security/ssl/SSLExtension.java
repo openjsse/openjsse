@@ -28,10 +28,9 @@ package org.openjsse.sun.security.ssl;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Locale;
+import java.util.*;
+
+import sun.security.action.GetPropertyAction;
 import org.openjsse.sun.security.ssl.SSLHandshake.HandshakeMessage;
 import org.openjsse.sun.security.util.HexDumpEncoder;
 
@@ -607,8 +606,8 @@ enum SSLExtension implements SSLStringizer {
     }
 
     public boolean isAvailable(ProtocolVersion protocolVersion) {
-        for (int i = 0; i < supportedProtocols.length; i++) {
-            if (supportedProtocols[i] == protocolVersion) {
+        for (ProtocolVersion supportedProtocol : supportedProtocols) {
+            if (supportedProtocol == protocolVersion) {
                 return true;
             }
         }
@@ -672,18 +671,23 @@ enum SSLExtension implements SSLStringizer {
         static final Collection<SSLExtension> defaults;
 
         static {
+            Collection<String> clientDisabledExtensions =
+                    getDisabledExtensions("jdk.tls.client.disableExtensions");
             Collection<SSLExtension> extensions = new LinkedList<>();
             for (SSLExtension extension : SSLExtension.values()) {
-                if (extension.handshakeType != SSLHandshake.NOT_APPLICABLE) {
+                if (extension.handshakeType != SSLHandshake.NOT_APPLICABLE &&
+                        !clientDisabledExtensions.contains(extension.name)) {
                     extensions.add(extension);
                 }
             }
 
-            // Switch off SNI extention?
-            boolean enableExtension =
-                Utilities.getBooleanProperty("jsse.enableSNIExtension", true);
-            if (!enableExtension) {
-                extensions.remove(CH_SERVER_NAME);
+            // Switch off SNI extension?
+            if (extensions.contains(CH_SERVER_NAME)) {
+                boolean enableExtension = Utilities.getBooleanProperty(
+                        "jsse.enableSNIExtension", true);
+                if (!enableExtension) {
+                    extensions.remove(CH_SERVER_NAME);
+                }
             }
 
             // To switch off the max_fragment_length extension.
@@ -694,13 +698,61 @@ enum SSLExtension implements SSLStringizer {
             // the two properties set to true, the extension is switch on.
             // We may remove the "jsse.enableMFLExtension" property in the
             // future.  Please don't continue to use the misspelling property.
-            enableExtension =
-                Utilities.getBooleanProperty(
-                        "jsse.enableMFLNExtension", false) ||
-                Utilities.getBooleanProperty(
-                        "jsse.enableMFLExtension", false);
-            if (!enableExtension) {
-                extensions.remove(CH_MAX_FRAGMENT_LENGTH);
+            if (extensions.contains(CH_MAX_FRAGMENT_LENGTH)) {
+                boolean enableExtension =
+                        Utilities.getBooleanProperty(
+                                "jsse.enableMFLNExtension", false) ||
+                        Utilities.getBooleanProperty(
+                                "jsse.enableMFLExtension", false);
+                if (!enableExtension) {
+                    extensions.remove(CH_MAX_FRAGMENT_LENGTH);
+                }
+            }
+
+            // To switch on certificate_authorities extension in ClientHello.
+            //
+            // Note: Please be careful to enable this extension in ClientHello.
+            //
+            // In practice, if the server certificate cannot be validated by
+            // the underlying programs, the user may manually check the
+            // certificate in order to access the service.  The certificate
+            // could be accepted manually, and the handshake continues.  For
+            // example, the browsers provide the manual option to accept
+            // untrusted server certificate. If this extension is enabled in
+            // the ClientHello handshake message, and the server's certificate
+            // does not chain back to any of the CAs in the extension, then the
+            // server will terminate the handshake and close the connection.
+            // There is no chance for the client to perform the manual check.
+            // Therefore, enabling this extension in ClientHello may lead to
+            // unexpected compatibility issues for such cases.
+            //
+            // According to TLS 1.3 specification [RFC 8446] the maximum size
+            // of the certificate_authorities extension is 2^16 bytes.  The
+            // maximum TLS record size is 2^14 bytes.  If the handshake
+            // message is bigger than maximum TLS record size, it should be
+            // splitted into several records.  In fact, some server
+            // implementations do not allow ClientHello messages bigger than
+            // the maximum TLS record size and will immediately abort the
+            // connection with a fatal alert.  Therefore, if the client trusts
+            // too many certificate authorities, there may be unexpected
+            // interoperability issues.
+            //
+            // Furthermore, if the client trusts more CAs such that it exceeds
+            // the size limit of the extension, enabling this extension in
+            // client side does not really make sense any longer as there is
+            // no way to indicate the server certificate selection accurately.
+            //
+            // In general, a server does not use multiple certificates issued
+            // from different CAs.  It is not expected to use this extension a
+            // lot in practice.  When there is a need to use this extension
+            // in ClientHello handshake message, please take care of the
+            // potential compatibility and interoperability issues above.
+            if (extensions.contains(CH_CERTIFICATE_AUTHORITIES)) {
+                boolean enableExtension = Utilities.getBooleanProperty(
+                        "org.openjsse.client.enableCAExtension", false);
+                if (!enableExtension) {
+                    extensions.remove(CH_CERTIFICATE_AUTHORITIES);
+                }
             }
 
             defaults = Collections.unmodifiableCollection(extensions);
@@ -712,14 +764,51 @@ enum SSLExtension implements SSLStringizer {
         static final Collection<SSLExtension> defaults;
 
         static {
+            Collection<String> serverDisabledExtensions =
+                    getDisabledExtensions("jdk.tls.server.disableExtensions");
             Collection<SSLExtension> extensions = new LinkedList<>();
             for (SSLExtension extension : SSLExtension.values()) {
-                if (extension.handshakeType != SSLHandshake.NOT_APPLICABLE) {
+                if (extension.handshakeType != SSLHandshake.NOT_APPLICABLE &&
+                        !serverDisabledExtensions.contains(extension.name)) {
                     extensions.add(extension);
                 }
             }
 
             defaults = Collections.unmodifiableCollection(extensions);
         }
+    }
+
+    // Get disabled extensions, which could be customized with System Properties.
+    private static Collection<String> getDisabledExtensions(
+                String propertyName) {
+        String property = GetPropertyAction.privilegedGetProperty(propertyName);
+        if (SSLLogger.isOn && SSLLogger.isOn("ssl,sslctx")) {
+            SSLLogger.fine(
+                    "System property " + propertyName + " is set to '" +
+                            property + "'");
+        }
+        if (property != null && !property.isEmpty()) {
+            // remove double quote marks from beginning/end of the property
+            if (property.length() > 1 && property.charAt(0) == '"' &&
+                    property.charAt(property.length() - 1) == '"') {
+                property = property.substring(1, property.length() - 1);
+            }
+        }
+
+        if (property != null && !property.isEmpty()) {
+            String[] extensionNames = property.split(",");
+            Collection<String> extensions =
+                    new ArrayList<>(extensionNames.length);
+            for (String extension : extensionNames) {
+                extension = extension.trim();
+                if (!extension.isEmpty()) {
+                    extensions.add(extension);
+                }
+            }
+
+            return extensions;
+        }
+
+        return Collections.emptyList();
     }
 }
