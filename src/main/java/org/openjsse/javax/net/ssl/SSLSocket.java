@@ -51,12 +51,6 @@
 
 package org.openjsse.javax.net.ssl;
 
-import java.io.IOException;
-import java.net.*;
-import java.util.List;
-import java.util.function.BiFunction;
-import javax.net.ssl.*;
-
 /**
  * This class extends javax.net.ssl.SSLSocket class
  * for backward compatibility with early versions of OpenJSSE

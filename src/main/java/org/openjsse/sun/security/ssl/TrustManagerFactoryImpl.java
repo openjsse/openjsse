@@ -29,7 +29,6 @@ import java.io.*;
 import java.security.*;
 import java.security.cert.*;
 import java.util.*;
-import org.openjsse.javax.net.ssl.*;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.net.ssl.TrustManagerFactorySpi;

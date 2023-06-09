@@ -31,8 +31,6 @@
 
 package org.openjsse.com.sun.net.ssl;
 
-import java.util.*;
-import java.io.*;
 import java.security.*;
 import java.security.Provider.Service;
 import java.net.Socket;

@@ -26,7 +26,6 @@
 package org.openjsse.sun.security.provider;
 
 import static org.openjsse.sun.security.provider.ByteArrayAccess.*;
-import java.nio.*;
 import java.util.*;
 import java.security.*;
 

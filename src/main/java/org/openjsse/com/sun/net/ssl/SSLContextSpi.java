@@ -29,7 +29,6 @@
 
 package org.openjsse.com.sun.net.ssl;
 
-import java.util.*;
 import java.security.*;
 import javax.net.ssl.*;
 

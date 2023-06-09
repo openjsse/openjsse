@@ -55,9 +55,6 @@ import java.security.*;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
-
-import com.sun.crypto.provider.*;
 
 // nested static class for the ChaCha20 key generator
 public final class ChaCha20KeyGenerator extends KeyGeneratorSpi {

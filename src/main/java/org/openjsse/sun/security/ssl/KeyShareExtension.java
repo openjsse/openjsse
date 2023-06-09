@@ -42,7 +42,6 @@ import org.openjsse.sun.security.ssl.DHKeyExchange.DHECredentials;
 import org.openjsse.sun.security.ssl.DHKeyExchange.DHEPossession;
 import org.openjsse.sun.security.ssl.ECDHKeyExchange.ECDHECredentials;
 import org.openjsse.sun.security.ssl.ECDHKeyExchange.ECDHEPossession;
-import org.openjsse.sun.security.ssl.KeyShareExtension.CHKeyShareSpec;
 import org.openjsse.sun.security.ssl.SSLExtension.ExtensionConsumer;
 import org.openjsse.sun.security.ssl.SSLExtension.SSLExtensionSpec;
 import org.openjsse.sun.security.ssl.SSLHandshake.HandshakeMessage;

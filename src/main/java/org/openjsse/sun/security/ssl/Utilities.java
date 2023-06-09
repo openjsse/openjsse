@@ -28,7 +28,6 @@ package org.openjsse.sun.security.ssl;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Pattern;
-import org.openjsse.javax.net.ssl.*;
 import javax.net.ssl.StandardConstants;
 import javax.net.ssl.SNIServerName;
 import javax.net.ssl.SNIHostName;

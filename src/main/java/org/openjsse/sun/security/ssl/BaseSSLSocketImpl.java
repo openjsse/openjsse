@@ -28,9 +28,7 @@ package org.openjsse.sun.security.ssl;
 import java.io.*;
 import java.net.*;
 import java.nio.channels.SocketChannel;
-import java.util.Set;
 import org.openjsse.javax.net.ssl.SSLSocket;
-import javax.net.ssl.*;
 
 /**
  * Abstract base class for SSLSocketImpl.

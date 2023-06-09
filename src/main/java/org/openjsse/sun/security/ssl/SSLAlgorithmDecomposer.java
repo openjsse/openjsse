@@ -29,9 +29,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.openjsse.sun.security.ssl.CipherSuite.HashAlg;
 import org.openjsse.sun.security.ssl.CipherSuite.KeyExchange;
-import static org.openjsse.sun.security.ssl.CipherSuite.KeyExchange.*;
 import org.openjsse.sun.security.ssl.CipherSuite.MacAlg;
-import static org.openjsse.sun.security.ssl.SSLCipher.*;
 import sun.security.util.AlgorithmDecomposer;
 
 /**

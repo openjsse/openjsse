@@ -30,11 +30,7 @@
 package org.openjsse.com.sun.net.ssl;
 
 import java.security.*;
-import java.util.*;
 import javax.net.ssl.*;
-
-import org.openjsse.sun.security.ssl.SSLSocketFactoryImpl;
-import org.openjsse.sun.security.ssl.SSLServerSocketFactoryImpl;
 
 /**
  * Instances of this class represent a secure socket protocol

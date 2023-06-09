@@ -40,14 +40,12 @@ import java.net.Proxy;
 import java.net.ProtocolException;
 import java.net.MalformedURLException;
 import java.io.*;
-import java.net.Authenticator;
 import javax.net.ssl.*;
 import java.security.Permission;
 import java.security.Principal;
 import java.util.Map;
 import java.util.List;
 import org.openjsse.sun.net.util.IPAddressUtil;
-import sun.net.www.http.HttpClient;
 
 /**
  * A class to represent an HTTP connection to a remote object.

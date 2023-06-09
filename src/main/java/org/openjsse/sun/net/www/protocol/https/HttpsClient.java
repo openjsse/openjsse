@@ -39,11 +39,8 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.security.Principal;
 import java.security.cert.*;
-import java.util.Objects;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import javax.security.auth.x500.X500Principal;
 
 import javax.net.ssl.*;
 import sun.net.www.http.HttpClient;
