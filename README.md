@@ -73,3 +73,5 @@ The project is created and actively supported by engineers from [Azul Systems](h
 | 1.8.0_362 | 1.1.11       |
 | 1.8.0_371 | 1.1.12       |
 | 1.8.0_372 | 1.1.12       |
+| 1.8.0_381 | 1.1.13       |
+| 1.8.0_382 | 1.1.13       |
