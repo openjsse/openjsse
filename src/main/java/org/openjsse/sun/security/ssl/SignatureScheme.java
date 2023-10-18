@@ -26,7 +26,6 @@
 package org.openjsse.sun.security.ssl;
 
 import java.security.*;
-import java.security.interfaces.ECPrivateKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.MGF1ParameterSpec;

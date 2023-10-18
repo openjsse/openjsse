@@ -52,9 +52,6 @@
 package org.openjsse.javax.net.ssl;
 
 import java.nio.ByteBuffer;
-import java.nio.ReadOnlyBufferException;
-import java.util.List;
-import java.util.function.BiFunction;
 
 import javax.net.ssl.*;
 

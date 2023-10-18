@@ -32,10 +32,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Iterator;
 
-import java.security.Principal;
 import java.security.cert.*;
-
-import javax.security.auth.x500.X500Principal;
 
 import sun.security.util.HostnameChecker;
 import sun.security.util.DerValue;

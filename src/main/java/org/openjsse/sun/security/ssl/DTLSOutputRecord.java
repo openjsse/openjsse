@@ -28,7 +28,6 @@ package org.openjsse.sun.security.ssl;
 import java.io.*;
 import java.nio.*;
 import java.util.*;
-import org.openjsse.javax.net.ssl.*;
 import javax.net.ssl.SSLHandshakeException;
 import org.openjsse.sun.security.ssl.SSLCipher.SSLWriteCipher;
 

@@ -30,11 +30,6 @@
 package org.openjsse.com.sun.net.ssl;
 
 import java.security.*;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.StringTokenizer;
-import java.security.Permissions;
-import java.lang.SecurityManager;
 
 /**
  * This class is for various network permissions.

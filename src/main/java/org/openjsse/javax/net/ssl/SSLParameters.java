@@ -51,15 +51,6 @@
 
 package org.openjsse.javax.net.ssl;
 
-import java.security.AlgorithmConstraints;
-import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-
 /**
  * Encapsulates parameters for an SSL/TLS/DTLS connection. The parameters
  * are the list of ciphersuites to be accepted in an SSL/TLS/DTLS handshake,
@@ -98,7 +89,6 @@ public class SSLParameters extends javax.net.ssl.SSLParameters {
 
     private boolean enableRetransmissions = true;
     private int maximumPacketSize = 0;
-    private String[] applicationProtocols = new String[0];
 
     /**
      * Constructs SSLParameters.

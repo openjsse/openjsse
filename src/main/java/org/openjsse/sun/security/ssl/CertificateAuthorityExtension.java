@@ -29,18 +29,14 @@ package org.openjsse.sun.security.ssl;
 import org.openjsse.sun.security.ssl.SSLExtension.ExtensionConsumer;
 import org.openjsse.sun.security.ssl.SSLExtension.SSLExtensionSpec;
 import org.openjsse.sun.security.ssl.SSLHandshake.HandshakeMessage;
-import sun.security.util.DerOutputStream;
-import sun.security.util.DerValue;
 
 import javax.net.ssl.SSLProtocolException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.util.*;
 
-import java.security.cert.Certificate;
 import javax.security.auth.x500.X500Principal;
 
 /**

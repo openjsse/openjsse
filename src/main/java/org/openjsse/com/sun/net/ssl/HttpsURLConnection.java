@@ -33,7 +33,6 @@ import java.net.URL;
 import java.net.HttpURLConnection;
 import java.io.IOException;
 import java.security.cert.Certificate;
-import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
